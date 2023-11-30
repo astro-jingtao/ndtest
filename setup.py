@@ -9,7 +9,7 @@ f2py_compile = Extension(
 )
 
 setup(
-    name="ndtesst",
+    name="ndtest",
     version="0.1",
     author="Tao Jing",
     author_email="jingt20@mails.tsinghua.edu.cn",
