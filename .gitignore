@@ -1,1 +1,5 @@
 scratch
+*.egg-info
+build
+*.so
+__pycache__
