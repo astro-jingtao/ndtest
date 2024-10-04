@@ -6,11 +6,13 @@ import numpy as np
 from numpy import random
 from scipy.stats import kstwobign, pearsonr
 from sklearn.neighbors import KDTree
+from joblib import Parallel, delayed
 from .maxdist import maxdist
 
 __all__ = ['ks2d2s']
 
-def ks2d2s(x1, y1, x2, y2, nboot=None):
+
+def ks2d2s(x1, y1, x2, y2, nboot=None, n_jobs=1):
     '''Two-dimensional Kolmogorov-Smirnov test on two samples. 
     Parameters
     ----------
@@ -21,6 +23,8 @@ def ks2d2s(x1, y1, x2, y2, nboot=None):
     nboot : None or int
         Number of bootstrap resample to estimate the p-value. A large number is expected.
         If None, an approximate analytic estimate will be used.
+    n_jobs : int, optional
+        The number of jobs to use for the bootstrap resampling based p-value estimation. If -1, all CPUs are used.
 
     Returns
     -------
@@ -44,6 +48,11 @@ def ks2d2s(x1, y1, x2, y2, nboot=None):
     Press, W.H. et al. 2007, Numerical Recipes, section 14.8
 
     '''
+    x1 = np.asarray(x1)
+    y1 = np.asarray(y1)
+    x2 = np.asarray(x2)
+    y2 = np.asarray(y2)
+
     assert (len(x1) == len(y1)) and (len(x2) == len(y2))
     n1, n2 = len(x1), len(x2)
     D = avgmaxdist(x1, y1, x2, y2)
@@ -59,13 +68,23 @@ def ks2d2s(x1, y1, x2, y2, nboot=None):
         n = n1 + n2
         x = np.concatenate([x1, x2])
         y = np.concatenate([y1, y2])
-        d = np.empty(nboot, 'f')
-        for i in range(nboot):
+        # d = np.empty(nboot, 'f')
+        # for i in range(nboot):
+        #     idx = random.choice(n, n, replace=True)
+        #     ix1, ix2 = idx[:n1], idx[n1:]
+        #     d[i] = avgmaxdist(x[ix1], y[ix1], x[ix2], y[ix2])
+
+        ix1_ix2_lst = []
+
+        for _ in range(nboot):
             idx = random.choice(n, n, replace=True)
-            ix1, ix2 = idx[:n1], idx[n1:]
-            #ix1 = random.choice(n, n1, replace=True)
-            #ix2 = random.choice(n, n2, replace=True)
-            d[i] = avgmaxdist(x[ix1], y[ix1], x[ix2], y[ix2])
+            ix1_ix2_lst.append((idx[:n1], idx[n1:]))
+
+        with Parallel(n_jobs=n_jobs) as parallel:
+            d = parallel(
+                delayed(avgmaxdist)(x[ix1], y[ix1], x[ix2], y[ix2])
+                for ix1, ix2 in ix1_ix2_lst)
+
         p = np.sum(d > D).astype('f') / nboot
 
     return D, p
