@@ -1,5 +1,5 @@
-from setuptools import setup, find_packages
-from numpy.distutils.core import setup, Extension
+from numpy.distutils.core import Extension
+from setuptools import find_packages, setup
 
 f2py_compile = Extension(
     name='ndtest.maxdist',  # Name of the extension module
