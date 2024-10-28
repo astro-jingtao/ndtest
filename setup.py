@@ -1,17 +1,36 @@
-import subprocess
+import os
 
-from setuptools import find_packages, setup
+from setuptools import Extension, find_packages, setup
+from setuptools.command.build_ext import build_ext
 
 
-f2py_command = [
-    "f2py",
-    "-c",
-    "maxdist.f90",
-    "-m",
-    "maxdist",
-    "--f90flags=-O3",
-]
-subprocess.run(f2py_command, check=True, cwd="ndtest")
+class f2py_Extension(Extension):
+
+    def __init__(self, name, sourcedirs):
+        Extension.__init__(self, name, sources=[])
+        self.sourcedirs = [
+            os.path.abspath(sourcedir) for sourcedir in sourcedirs
+        ]
+        self.dirs = sourcedirs
+
+
+class f2py_Build(build_ext):
+
+    def run(self):
+        for ext in self.extensions:
+            self.build_extension(ext)
+
+    def build_extension(self, ext):
+
+        # the build directory
+        build_lib = os.path.abspath(self.build_lib)
+
+        # compile
+        for to_compile in ext.sourcedirs:
+            module_name = os.path.split(to_compile)[1].split('.')[0]
+            os.system(
+                f'cd {build_lib}/{ext.name};f2py -c {to_compile} -m {module_name} --f90flags=-O3'
+            )
 
 setup(
     name="ndtest",
@@ -21,7 +40,5 @@ setup(
     description=
     "The collection of nonparametric test of the equality of high-dimensional probability distributions",
     packages=find_packages(),
-    package_data={
-        '': ['*.so', '*.dll'],  # Include shared libraries
-    },
-)
+    ext_modules=[f2py_Extension('ndtest', ['ndtest/maxdist.f90'])],
+    cmdclass=dict(build_ext=f2py_Build))
