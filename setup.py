@@ -1,12 +1,17 @@
-from numpy.distutils.core import Extension
+import subprocess
+
 from setuptools import find_packages, setup
 
-f2py_compile = Extension(
-    name='ndtest.maxdist',  # Name of the extension module
-    sources=['ndtest/maxdist.f90'],  # Fortran source file(s)
-    extra_compile_args=['-O3'],  # Additional compilation options if needed
-    f2py_options=['--quiet'],  # f2py-specific options
-)
+
+f2py_command = [
+    "f2py",
+    "-c",
+    "maxdist.f90",
+    "-m",
+    "maxdist",
+    "--f90flags=-O3",
+]
+subprocess.run(f2py_command, check=True, cwd="ndtest")
 
 setup(
     name="ndtest",
@@ -15,5 +20,8 @@ setup(
     author_email="jingt20@mails.tsinghua.edu.cn",
     description=
     "The collection of nonparametric test of the equality of high-dimensional probability distributions",
-    ext_modules=[f2py_compile],
-    packages=find_packages())
+    packages=find_packages(),
+    package_data={
+        '': ['*.so', '*.dll'],  # Include shared libraries
+    },
+)

@@ -8,12 +8,9 @@ subroutine maxdist(x1, y1, sort1, x2, y2, sort2, n1, n2, D_max)
     logical :: ly1(n1), ly2(n2)
     real :: a1, b1, c1, d1, a2, b2, c2, d2, D(4)
 
-    ! call argsort(x1,n1,sort1)
-    ! call argsort(x2,n2,sort2)
     D_max = 0
     i_indx2 = 0
 
-    ! write(*,*) "sort1", sort1
 
     do i_indx1 = 1, n1
         ! i_indx2 指向最大的小于等于 x1[sort1[i_indx1]] 的元素
@@ -33,9 +30,13 @@ subroutine maxdist(x1, y1, sort1, x2, y2, sort2, n1, n2, D_max)
         call quadct(ly2, sort2, i_indx2, n2, a2, b2, c2, d2)
         ! write(*,*) n2, a2, b2, c2, d2, a2 + b2 + c2 + d2
 
+        ! see Press, William H. Numerical recipes 3rd edition: The art of scientific computing. Cambridge university press, 2007. Section 14.8 for 1/real(n1) term.
         D = [(a1 - a2 - 1/real(n1)), (b1 - b2), (c1 - c2), (d1 - d2)]
         D_max = max(D_max, maxval(D) + 1/real(n1), -minval(D))
     end do
+
+    ! write(*,*) D_max
+
 end subroutine
 
 subroutine quadct(ly, sort, i_indx, n, a, b, c, d)
@@ -49,25 +50,3 @@ subroutine quadct(ly, sort, i_indx, n, a, b, c, d)
     c = real(count(ly(sort(i_indx+1:n)))) / real(n)
     d = 1 - real(i_indx)/ real(n) - c
 end subroutine
-
-! ! 速度瓶颈在这里
-! subroutine argsort(arr,n,indx)
-!     implicit none
-!     integer, intent(in) :: n
-!     real, intent(in) :: arr(n)
-!     integer, intent(out) :: indx(n)
-!     integer :: i, j
-!     integer :: temp
-!     do i = 1, n
-!         indx(i) = i
-!     end do
-!     do i = 1, n-1
-!         do j = i+1, n
-!             if (arr(indx(j)) < arr(indx(i))) then
-!                 temp = indx(i)
-!                 indx(i) = indx(j)
-!                 indx(j) = temp
-!             end if
-!         end do
-!     end do
-! end subroutine

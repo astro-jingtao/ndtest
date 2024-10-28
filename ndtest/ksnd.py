@@ -2,11 +2,12 @@
 # 209 ms for 10000 + 10000 points
 
 from __future__ import division
+
 import numpy as np
+from joblib import Parallel, delayed
 from numpy import random
 from scipy.stats import kstwobign, pearsonr
-from sklearn.neighbors import KDTree
-from joblib import Parallel, delayed
+
 from .maxdist import maxdist
 
 __all__ = ['ks2d2s']
@@ -68,11 +69,6 @@ def ks2d2s(x1, y1, x2, y2, nboot=None, n_jobs=1):
         n = n1 + n2
         x = np.concatenate([x1, x2])
         y = np.concatenate([y1, y2])
-        # d = np.empty(nboot, 'f')
-        # for i in range(nboot):
-        #     idx = random.choice(n, n, replace=True)
-        #     ix1, ix2 = idx[:n1], idx[n1:]
-        #     d[i] = avgmaxdist(x[ix1], y[ix1], x[ix2], y[ix2])
 
         ix1_ix2_lst = []
 
