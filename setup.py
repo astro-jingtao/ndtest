@@ -28,9 +28,12 @@ class f2py_Build(build_ext):
         # compile
         for to_compile in ext.sourcedirs:
             module_name = os.path.split(to_compile)[1].split('.')[0]
-            os.system(
+            result = os.system(
                 f'cd {build_lib}/{ext.name};f2py -c {to_compile} -m {module_name} --f90flags=-O3'
             )
+            if result != 0:
+                raise RuntimeError(f'Failed to compile {to_compile}')
+
 
 setup(
     name="ndtest",
