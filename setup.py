@@ -64,7 +64,7 @@ class f2py_Build(build_ext):
 
 setup(
     name="ndtest",
-    version="0.2.0",
+    version="0.3.0",
     author="Tao Jing",
     author_email="jingt20@mails.tsinghua.edu.cn",
     description=
