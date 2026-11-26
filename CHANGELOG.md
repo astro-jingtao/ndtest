@@ -9,6 +9,7 @@
 - A test suite under `tests/`: the Fortran kernel against a direct evaluation of the definition of the statistic, the analytic and the bootstrap p-value, and the documented usage. Install with `pip install .[test]` and run `pytest`.
 - `ruff.toml` configures the linter; `ruff format --check .` and `ruff check .` report no findings.
 - `tools/benchmark_ks2d2s.py` measures the running time of the Fortran kernel and of `ks2d2s`.
+- `TODO.md` lists the open items: wheels for the three platforms and the package name on PyPI.
 
 ### Changed
 
