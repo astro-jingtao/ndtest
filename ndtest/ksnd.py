@@ -1,20 +1,31 @@
 # original version from https://github.com/syrte/ndtest
 # 209 ms for 10000 + 10000 points
 
-from __future__ import division
+"""Two-dimensional two-sample Kolmogorov-Smirnov test with a Fortran kernel."""
 
-import numpy as np
+from __future__ import annotations
+
 from joblib import Parallel, delayed
+import numpy as np
 from numpy import random
+from numpy.typing import ArrayLike
 from scipy.stats import kstwobign, pearsonr
 
-from .maxdist import maxdist
+from ndtest.maxdist import maxdist
 
 __all__ = ['ks2d2s']
 
 
-def ks2d2s(x1, y1, x2, y2, nboot=None, n_jobs=1):
-    '''Two-dimensional Kolmogorov-Smirnov test on two samples. 
+def ks2d2s(
+    x1: ArrayLike,
+    y1: ArrayLike,
+    x2: ArrayLike,
+    y2: ArrayLike,
+    *,
+    nboot: int | None = None,
+    n_jobs: int = 1,
+) -> tuple[np.floating, np.floating]:
+    '''Two-dimensional Kolmogorov-Smirnov test on two samples.
     Parameters
     ----------
     x1, y1 : ndarray, shape (n1, )
@@ -33,11 +44,10 @@ def ks2d2s(x1, y1, x2, y2, nboot=None, n_jobs=1):
         KS statistic.
     p : float
         Two-tailed p-value.
-    
 
     Notes
     -----
-    This is the two-sided K-S test. Small p-values means that the two samples are significantly different. 
+    This is the two-sided K-S test. Small p-values means that the two samples are significantly different.
     Note that the p-value is only an approximation as the analytic distribution is unkonwn. The approximation
     is accurate enough when N > ~20 and p-value < ~0.20 or so. When p-value > 0.20, the value may not be accurate,
     but it certainly implies that the two samples are not significantly different. (cf. Press 2007)
@@ -54,7 +64,8 @@ def ks2d2s(x1, y1, x2, y2, nboot=None, n_jobs=1):
     x2 = np.asarray(x2)
     y2 = np.asarray(y2)
 
-    assert (len(x1) == len(y1)) and (len(x2) == len(y2))
+    assert len(x1) == len(y1)
+    assert len(x2) == len(y2)
     n1, n2 = len(x1), len(x2)
     D = avgmaxdist(x1, y1, x2, y2)
 
@@ -86,13 +97,17 @@ def ks2d2s(x1, y1, x2, y2, nboot=None, n_jobs=1):
     return D, p
 
 
-def avgmaxdist(x1, y1, x2, y2):
+def avgmaxdist(
+    x1: np.ndarray, y1: np.ndarray, x2: np.ndarray, y2: np.ndarray
+) -> np.floating:
     D1 = maxdist_wraper(x1, y1, x2, y2)
     D2 = maxdist_wraper(x2, y2, x1, y1)
     return (D1 + D2) / 2
 
 
-def maxdist_wraper(x1, y1, x2, y2):
+def maxdist_wraper(
+    x1: np.ndarray, y1: np.ndarray, x2: np.ndarray, y2: np.ndarray
+) -> np.floating:
     sort1 = np.argsort(x1)
     sort2 = np.argsort(x2)
     D_max = np.zeros(1, dtype=np.float32)
