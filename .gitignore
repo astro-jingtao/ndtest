@@ -1,6 +1,7 @@
 scratch
 *.egg-info
 build
+dist
 *.so
 __pycache__
 .ruff_cache/

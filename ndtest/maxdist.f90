@@ -2,18 +2,18 @@ subroutine maxdist(x1, y1, sort1, x2, y2, sort2, n1, n2, D_max)
     implicit none
     integer, intent(in) :: n1, n2, sort1(n1), sort2(n2)
     real, intent(in) :: x1(n1), y1(n1), x2(n2), y2(n2)
-    real, intent(inout) :: D_max
+    real, intent(inout) :: D_max(1)
     integer :: i_indx1, i_indx2
     real :: this_y1
     logical :: ly1(n1), ly2(n2)
     real :: a1, b1, c1, d1, a2, b2, c2, d2, D(4)
 
-    D_max = 0
+    D_max(1) = 0
     i_indx2 = 0
 
 
     do i_indx1 = 1, n1
-        ! i_indx2 指向最大的小于等于 x1[sort1[i_indx1]] 的元素
+        ! i_indx2 is the number of sample-2 points with x2 <= x1(sort1(i_indx1))
         do while ((i_indx2 < n2).and.(x2(sort2(i_indx2+1)) <= x1(sort1(i_indx1))))
             i_indx2 = i_indx2 + 1
         end do
@@ -32,7 +32,7 @@ subroutine maxdist(x1, y1, sort1, x2, y2, sort2, n1, n2, D_max)
 
         ! see Press, William H. Numerical recipes 3rd edition: The art of scientific computing. Cambridge university press, 2007. Section 14.8 for 1/real(n1) term.
         D = [(a1 - a2 - 1/real(n1)), (b1 - b2), (c1 - c2), (d1 - d2)]
-        D_max = max(D_max, maxval(D) + 1/real(n1), -minval(D))
+        D_max(1) = max(D_max(1), maxval(D) + 1/real(n1), -minval(D))
     end do
 
     ! write(*,*) D_max
