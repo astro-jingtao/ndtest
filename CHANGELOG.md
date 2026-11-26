@@ -10,6 +10,7 @@
 - `ruff.toml` configures the linter; `ruff format --check .` and `ruff check .` report no findings.
 - `tools/benchmark_ks2d2s.py` measures the running time of the Fortran kernel and of `ks2d2s`.
 - `TODO.md` lists the open items: wheels for the three platforms and the package name on PyPI.
+- A GitHub Actions workflow: `ruff format --check .` and `ruff check .`; the test suite against an isolated `pip install ".[test]"` on Linux, macOS and Windows for Python 3.9 to 3.13; and a check that builds the sdist, builds a wheel from it, installs the wheel and runs the tests.
 
 ### Changed
 
