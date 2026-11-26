@@ -3,3 +3,4 @@ scratch
 build
 *.so
 __pycache__
+.ruff_cache/
