@@ -11,7 +11,7 @@ from scipy.stats import kstwobign, pearsonr
 
 from ndtest.maxdist import maxdist
 
-__all__ = ['ks2d2s']
+__all__ = ["ks2d2s"]
 
 
 def ks2d2s(
@@ -23,7 +23,7 @@ def ks2d2s(
     nboot: int | None = None,
     n_jobs: int = 1,
 ) -> tuple[np.floating, np.floating]:
-    '''Two-dimensional Kolmogorov-Smirnov test on two samples.
+    """Two-dimensional Kolmogorov-Smirnov test on two samples.
     Parameters
     ----------
     x1, y1 : ndarray, shape (n1, )
@@ -56,7 +56,7 @@ def ks2d2s(
     Fasano, G. and Franceschini, A. 1987, A Multidimensional Version of the Kolmogorov-Smirnov Test, MNRAS, 225, 155-170
     Press, W.H. et al. 2007, Numerical Recipes, section 14.8
 
-    '''
+    """
     x1 = np.asarray(x1)
     y1 = np.asarray(y1)
     x2 = np.asarray(x2)
@@ -87,25 +87,21 @@ def ks2d2s(
 
         with Parallel(n_jobs=n_jobs) as parallel:
             d = parallel(
-                delayed(avgmaxdist)(x[ix1], y[ix1], x[ix2], y[ix2])
-                for ix1, ix2 in ix1_ix2_lst)
+                delayed(avgmaxdist)(x[ix1], y[ix1], x[ix2], y[ix2]) for ix1, ix2 in ix1_ix2_lst
+            )
 
-        p = np.sum(d > D).astype('f') / nboot
+        p = np.sum(d > D).astype("f") / nboot
 
     return D, p
 
 
-def avgmaxdist(
-    x1: np.ndarray, y1: np.ndarray, x2: np.ndarray, y2: np.ndarray
-) -> np.floating:
+def avgmaxdist(x1: np.ndarray, y1: np.ndarray, x2: np.ndarray, y2: np.ndarray) -> np.floating:
     D1 = maxdist_wraper(x1, y1, x2, y2)
     D2 = maxdist_wraper(x2, y2, x1, y1)
     return (D1 + D2) / 2
 
 
-def maxdist_wraper(
-    x1: np.ndarray, y1: np.ndarray, x2: np.ndarray, y2: np.ndarray
-) -> np.floating:
+def maxdist_wraper(x1: np.ndarray, y1: np.ndarray, x2: np.ndarray, y2: np.ndarray) -> np.floating:
     sort1 = np.argsort(x1)
     sort2 = np.argsort(x2)
     D_max = np.zeros(1, dtype=np.float32)

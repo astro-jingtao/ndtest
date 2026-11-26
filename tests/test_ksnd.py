@@ -27,7 +27,12 @@ def reference_maxdist(x1, y1, x2, y2):
         left, below = x1 <= x1[i], y1 <= y1[i]
         far_left, far_below = x2 <= x1[i], y2 <= y1[i]
         first = (left & below, left & ~below, ~left & below, ~left & ~below)
-        second = (far_left & far_below, far_left & ~far_below, ~far_left & far_below, ~far_left & ~far_below)
+        second = (
+            far_left & far_below,
+            far_left & ~far_below,
+            ~far_left & far_below,
+            ~far_left & ~far_below,
+        )
         a1, b1, c1, d1 = (np.mean(part) for part in first)
         a2, b2, c2, d2 = (np.mean(part) for part in second)
         difference = np.array((a1 - a2 - 1 / n1, b1 - b2, c1 - c2, d1 - d2))
