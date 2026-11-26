@@ -1,6 +1,4 @@
 # original version from https://github.com/syrte/ndtest
-# 209 ms for 10000 + 10000 points
-
 """Two-dimensional two-sample Kolmogorov-Smirnov test with a Fortran kernel."""
 
 from __future__ import annotations

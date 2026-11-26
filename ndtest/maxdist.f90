@@ -5,11 +5,14 @@ subroutine maxdist(x1, y1, sort1, x2, y2, sort2, n1, n2, D_max)
     real, intent(inout) :: D_max(1)
     integer :: i_indx1, i_indx2
     real :: this_y1
-    logical :: ly1(n1), ly2(n2)
+    real :: y1_sorted(n1), y2_sorted(n2)
     real :: a1, b1, c1, d1, a2, b2, c2, d2, D(4)
 
     D_max(1) = 0
     i_indx2 = 0
+    ! the y coordinates in the x order of their sample: quadct then counts over contiguous sections
+    y1_sorted = y1(sort1)
+    y2_sorted = y2(sort2)
 
 
     do i_indx1 = 1, n1
@@ -17,17 +20,14 @@ subroutine maxdist(x1, y1, sort1, x2, y2, sort2, n1, n2, D_max)
         do while ((i_indx2 < n2).and.(x2(sort2(i_indx2+1)) <= x1(sort1(i_indx1))))
             i_indx2 = i_indx2 + 1
         end do
-        
-        this_y1 = y1(sort1(i_indx1))
 
-        ly1 = y1 <= this_y1
-        ly2 = y2 <= this_y1
+        this_y1 = y1_sorted(i_indx1)
 
         ! write(*,*) x1(sort1(i_indx1))
-        call quadct(ly1, sort1, i_indx1, n1, a1, b1, c1, d1)
+        call quadct(y1_sorted, n1, i_indx1, this_y1, a1, b1, c1, d1)
         ! write(*,*) n1, a1, b1, c1, d1, a1 + b1 + c1 + d1
 
-        call quadct(ly2, sort2, i_indx2, n2, a2, b2, c2, d2)
+        call quadct(y2_sorted, n2, i_indx2, this_y1, a2, b2, c2, d2)
         ! write(*,*) n2, a2, b2, c2, d2, a2 + b2 + c2 + d2
 
         ! see Press, William H. Numerical recipes 3rd edition: The art of scientific computing. Cambridge university press, 2007. Section 14.8 for 1/real(n1) term.
@@ -39,14 +39,17 @@ subroutine maxdist(x1, y1, sort1, x2, y2, sort2, n1, n2, D_max)
 
 end subroutine
 
-subroutine quadct(ly, sort, i_indx, n, a, b, c, d)
+subroutine quadct(y, n, i_indx, y_thresh, a, b, c, d)
     implicit none
-    logical, intent(in) :: ly(n)
-    integer, intent(in) :: sort(n), i_indx, n
+    integer, intent(in) :: n, i_indx
+    real, intent(in) :: y(n)
+    real, intent(in) :: y_thresh
     real, intent(out) :: a, b, c, d
+    logical :: ly(n)
 
-    a = real(count(ly(sort(1:i_indx)))) / real(n)
+    ly = y <= y_thresh
+    a = real(count(ly(1:i_indx))) / real(n)
     b = real(i_indx) / real(n) - a
-    c = real(count(ly(sort(i_indx+1:n)))) / real(n)
+    c = real(count(ly(i_indx+1:n))) / real(n)
     d = 1 - real(i_indx)/ real(n) - c
 end subroutine
