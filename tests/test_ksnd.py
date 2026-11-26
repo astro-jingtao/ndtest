@@ -155,3 +155,34 @@ class TestInputs:
     def test_mismatched_lengths_raise(self):
         with pytest.raises(AssertionError):
             ks2d2s([1, 2], [1, 2, 3], [1, 2], [1, 2])
+
+
+class TestExactValues:
+    """Exact single-precision values of the statistic for fixed inputs.
+
+    The kernel counts in integers and divides once, so its result is the same
+    float32 on every platform; these values pin it.
+    """
+
+    def test_continuous_samples(self, two_samples):
+        (x1, y1), (x2, y2) = two_samples
+        assert maxdist_wraper(x1, y1, x2, y2) == np.float32(0.14809525)
+        assert maxdist_wraper(x2, y2, x1, y1) == np.float32(0.14761907)
+
+    def test_samples_with_ties(self):
+        rng = np.random.default_rng(7)
+        x1 = rng.integers(0, 5, size=30).astype(float)
+        y1 = rng.integers(0, 5, size=30).astype(float)
+        x2 = rng.integers(0, 5, size=40).astype(float) + rng.choice([0.0, 0.5])
+        y2 = rng.integers(0, 5, size=40).astype(float)
+        assert maxdist_wraper(x1, y1, x2, y2) == np.float32(0.3)
+        assert maxdist_wraper(x2, y2, x1, y1) == np.float32(0.3)
+
+    def test_coordinates_beyond_single_precision_resolution(self):
+        rng = np.random.default_rng(11)
+        x1 = 1e6 + rng.normal(size=120) * 1e-3
+        y1 = 1e6 + rng.normal(size=120) * 1e-3
+        x2 = 1e6 + rng.normal(size=90) * 1e-3
+        y2 = 1e6 + rng.normal(size=90) * 1e-3
+        assert maxdist_wraper(x1, y1, x2, y2) == np.float32(1.0)
+        assert maxdist_wraper(x2, y2, x1, y1) == np.float32(1.0)
