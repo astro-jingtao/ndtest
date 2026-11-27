@@ -55,15 +55,6 @@ def two_samples():
     return sample(rng, 300), sample(rng, 350)
 
 
-@pytest.fixture
-def seeded_bootstrap():
-    """Make the bootstrap resamples repeatable for the duration of a test."""
-    state = np.random.get_state()
-    np.random.seed(0)
-    yield
-    np.random.set_state(state)
-
-
 class TestDocumentedUsage:
     def test_readme_example(self):
         rng = np.random.default_rng(0)
@@ -190,12 +181,31 @@ class TestPValue:
         _, p = ks2d2s(x1, y1, x2, y2 + 1.0, nboot=100)
         assert p < 0.5
 
-    def test_bootstrap_p_value_does_not_depend_on_n_jobs(self, two_samples, seeded_bootstrap):
+    def test_bootstrap_p_value_does_not_depend_on_n_jobs(self, two_samples):
         (x1, y1), (x2, y2) = two_samples
-        _, p_serial = ks2d2s(x1, y1, x2, y2, nboot=50, n_jobs=1)
-        np.random.seed(0)
-        _, p_parallel = ks2d2s(x1, y1, x2, y2, nboot=50, n_jobs=2)
+        _, p_serial = ks2d2s(x1, y1, x2, y2, nboot=50, n_jobs=1, rng=0)
+        _, p_parallel = ks2d2s(x1, y1, x2, y2, nboot=50, n_jobs=2, rng=0)
         assert p_serial == p_parallel
+
+    def test_bootstrap_is_repeatable_for_a_seed(self, two_samples):
+        (x1, y1), (x2, y2) = two_samples
+        _, p_first = ks2d2s(x1, y1, x2, y2, nboot=100, rng=3)
+        _, p_second = ks2d2s(x1, y1, x2, y2, nboot=100, rng=3)
+        assert p_first == p_second
+
+    def test_bootstrap_accepts_a_generator(self, two_samples):
+        (x1, y1), (x2, y2) = two_samples
+        _, p_from_generator = ks2d2s(x1, y1, x2, y2, nboot=100, rng=np.random.default_rng(3))
+        _, p_from_seed = ks2d2s(x1, y1, x2, y2, nboot=100, rng=3)
+        assert p_from_generator == p_from_seed
+
+    def test_bootstrap_leaves_the_global_random_state_alone(self, two_samples):
+        (x1, y1), (x2, y2) = two_samples
+        np.random.seed(0)
+        expected = np.random.random()
+        np.random.seed(0)
+        ks2d2s(x1, y1, x2, y2, nboot=20)
+        assert np.random.random() == expected
 
 
 class TestInputs:

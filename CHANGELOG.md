@@ -16,6 +16,7 @@
 
 - The build uses the meson-python backend with a `meson.build` of its own; `setup.py` and its call into `f2py -c` are removed. One build path now serves every platform and Python version, and Windows no longer moves a `.libs` directory after the build.
 - `nboot` and `n_jobs` of `ks2d2s` are keyword-only arguments.
+- `ks2d2s` draws its bootstrap resamples from a generator of its own. The keyword argument `rng` takes a seed or a `numpy.random.Generator`, as `numpy.random.default_rng` does; without it the resamples come from a new generator fed by the operating system. `numpy.random.seed` no longer makes the bootstrap repeatable.
 - The Fortran kernel visits the points in the order of their x coordinate and keeps the quadrant counts in Fenwick trees over the y ranks, so its running time grows with (n1 + n2) log(n1 + n2) instead of n1 (n1 + n2). `ks2d2s` on two samples of 10,000 points takes about 5.5 ms on an Intel Xeon Gold 6248 with gfortran 8.5, and 80 ms at 100,000 points.
 - The Fortran kernel computes the statistic in double precision, with no loss in running time. Coordinates that differ only below single precision are told apart now, and the statistic differs from the one of the single-precision kernel beyond the seventh digit.
 - The README states the one requirement left for the installation (a Fortran compiler), shows the usage of `ks2d2s`, replaces the performance table with measurements of the current build, and describes the development setup.

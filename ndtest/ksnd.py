@@ -5,7 +5,6 @@ from __future__ import annotations
 
 from joblib import Parallel, delayed
 import numpy as np
-from numpy import random
 from numpy.typing import ArrayLike
 from scipy.stats import kstwobign, pearsonr
 
@@ -22,6 +21,7 @@ def ks2d2s(
     *,
     nboot: int | None = None,
     n_jobs: int = 1,
+    rng: np.random.Generator | int | None = None,
 ) -> tuple[np.floating, np.floating]:
     """Two-dimensional Kolmogorov-Smirnov test on two samples.
     Parameters
@@ -35,6 +35,8 @@ def ks2d2s(
         If None, an approximate analytic estimate will be used.
     n_jobs : int, optional
         The number of jobs to use for the bootstrap resampling based p-value estimation. If -1, all CPUs are used.
+    rng : `numpy.random.Generator`, optional
+        Pseudorandom number generator for the bootstrap resamples. When `rng` is None, a new `numpy.random.Generator` is created using entropy from the operating system. Types other than `numpy.random.Generator` are passed to `numpy.random.default_rng` to instantiate a `Generator`.
 
     Returns
     -------
@@ -75,6 +77,7 @@ def ks2d2s(
         d = D * sqen / (1 + r * (0.25 - 0.75 / sqen))
         p = kstwobign.sf(d)
     else:
+        rng = np.random.default_rng(rng)
         n = n1 + n2
         x = np.concatenate([x1, x2])
         y = np.concatenate([y1, y2])
@@ -82,7 +85,7 @@ def ks2d2s(
         ix1_ix2_lst = []
 
         for _ in range(nboot):
-            idx = random.choice(n, n, replace=True)
+            idx = rng.choice(n, n, replace=True)
             ix1_ix2_lst.append((idx[:n1], idx[n1:]))
 
         with Parallel(n_jobs=n_jobs) as parallel:

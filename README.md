@@ -20,7 +20,7 @@ D, p = ks2d2s(x1, y1, x2, y2)
 
 `ks2d2s` takes the coordinates of two samples and returns the KS statistic `D`, computed in double precision, and the two-tailed p-value `p`. Small p-values mean that the two samples are significantly different. The coordinates are one-dimensional array-likes of equal length within each sample, and the two samples may have different sizes.
 
-By default (`nboot=None`) the p-value is an analytic approximation. With `nboot=N`, `N` bootstrap resamples of the pooled sample estimate the p-value instead, and `n_jobs` sets the number of parallel jobs (`-1` uses all CPUs). Both are keyword arguments.
+By default (`nboot=None`) the p-value is an analytic approximation. With `nboot=N`, `N` bootstrap resamples of the pooled sample estimate the p-value instead; `n_jobs` sets the number of parallel jobs (`-1` uses all CPUs), and `rng` makes the resamples repeatable: it takes a seed or a `numpy.random.Generator`, as `numpy.random.default_rng` does. All three are keyword arguments.
 
 ## Installation
 
