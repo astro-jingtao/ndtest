@@ -9,7 +9,7 @@ Guide for an agent working in this repository. What holds for humans as well is 
 - `tests/test_ksnd.py`: the test suite. `reference_maxdist` in it evaluates the definition of the statistic without sorting.
 - `tools/benchmark_ks2d2s.py`: the timing behind the table of the README.
 - `meson.build`: the f2py build; the version of the package is declared here.
-- `TODO.md`, `CHANGELOG.md`: open items, and the changes since the last release under `## [unreleased]`.
+- `TODO.md`, `CHANGELOG.md`: open items, and the changes since the last release under the heading of the version they belong to.
 
 ## Build and verification
 
