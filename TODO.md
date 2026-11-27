@@ -8,7 +8,7 @@ Open work and the decision that each item waits for. Every item names the curren
 
 ## Naming
 
-- The name `ndtest` is taken on PyPI by another package ([syrte/ndtest](https://github.com/syrte/ndtest)); this package is installed from its git repository only. Current state: `pip install ndtest` installs the other package, and the first paragraph of the README states the relation between the two. Intended state: either a package on PyPI under a name that is free there, or the documented decision to stay with the git installation; the first changes the distribution name in `pyproject.toml` and `meson.build`, the README and the import name `ndtest`.
+- Publish under a name that is free on PyPI, or decide to stay with the git installation. Current state: PyPI lists no project named `ndtest` (checked 2026-11-27: the JSON API and the simple index answer 404 and `pip index versions ndtest` finds nothing), and whether the name can be registered is not verified; [syrte/ndtest](https://github.com/syrte/ndtest), the project of the same name, is installed from git only, and the first paragraph of the README states the relation between the two. Intended state: either a package on PyPI under a free name, or the documented decision to stay with the git installation; the first changes the distribution name in `pyproject.toml` and `meson.build` and the README, and the import name `ndtest` when the name differs from it.
 
 ## Release
 
