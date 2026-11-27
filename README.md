@@ -18,7 +18,7 @@ x2, y2 = rng.normal(size=(2, 1000))
 D, p = ks2d2s(x1, y1, x2, y2)
 ```
 
-`ks2d2s` takes the coordinates of two samples and returns the KS statistic `D` and the two-tailed p-value `p`. Small p-values mean that the two samples are significantly different. The coordinates are one-dimensional array-likes of equal length within each sample, and the two samples may have different sizes.
+`ks2d2s` takes the coordinates of two samples and returns the KS statistic `D`, computed in double precision, and the two-tailed p-value `p`. Small p-values mean that the two samples are significantly different. The coordinates are one-dimensional array-likes of equal length within each sample, and the two samples may have different sizes.
 
 By default (`nboot=None`) the p-value is an analytic approximation. With `nboot=N`, `N` bootstrap resamples of the pooled sample estimate the p-value instead, and `n_jobs` sets the number of parallel jobs (`-1` uses all CPUs). Both are keyword arguments.
 
@@ -45,14 +45,14 @@ On Windows a [MinGW-w64](https://www.mingw-w64.org/) toolchain provides both the
 
 | Points per sample | One direction | `ks2d2s` with analytic p-value |
 |-------------------|---------------|-------------------------------|
-| 1,000             | 0.15 ms       | 1.8 ms                        |
+| 1,000             | 0.15 ms       | 1.9 ms                        |
 | 5,000             | 0.8 ms        | 3.1 ms                        |
-| 10,000            | 2.0 ms        | 5.6 ms                        |
-| 20,000            | 4.1 ms        | 16 ms                         |
+| 10,000            | 1.6 ms        | 5.5 ms                        |
+| 20,000            | 3.8 ms        | 15 ms                         |
 | 50,000            | 11 ms         | 38 ms                         |
-| 100,000           | 25 ms         | 80 ms                         |
+| 100,000           | 27 ms         | 81 ms                         |
 
-One direction sorts both samples by x, ranks the y coordinates and runs the Fortran kernel, so its running time grows with (n1 + n2) log(n1 + n2). `ks2d2s` evaluates the statistic once per direction and averages the two. A bootstrap p-value evaluates the statistic once per direction for every resample: with `nboot=100` and 10,000 points per sample, the 200 evaluations take about 0.5 s on one process. `n_jobs` spreads the resamples over processes, which pays off when the evaluations take seconds: the same call takes 0.9 s with `n_jobs=2`, and 50,000 points per sample take 2.5 s against 1.9 s.
+One direction sorts both samples by x, ranks the y coordinates and runs the Fortran kernel, so its running time grows with (n1 + n2) log(n1 + n2). `ks2d2s` evaluates the statistic once per direction and averages the two. A bootstrap p-value evaluates the statistic once per direction for every resample: with `nboot=100` and 10,000 points per sample, the 200 evaluations take about 0.4 s on one process. `n_jobs` spreads the resamples over processes, which pays off when the evaluations take seconds: the same call takes 0.9 s with `n_jobs=2`, and 50,000 points per sample take 2.4 s against 1.9 s.
 
 To measure on your machine, install the package and run `python tools/benchmark_ks2d2s.py --n 10000`.
 

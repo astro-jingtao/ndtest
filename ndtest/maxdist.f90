@@ -2,13 +2,14 @@
 ! The points of each sample arrive in the order of their x coordinate, with the dense rank of their y coordinate. Two Fenwick trees over the y ranks hold the points with an x coordinate up to the current one, one tree per sample, so that every quadrant count is a sum over the ranks up to the rank of the origin.
 subroutine maxdist(x1, rank1, x2, rank2, n1, n2, D_max)
     implicit none
+    integer, parameter :: dp = selected_real_kind(15, 307)
     integer, intent(in) :: n1, n2, rank1(n1), rank2(n2)
-    real, intent(in) :: x1(n1), x2(n2)
-    real, intent(inout) :: D_max(1)
+    real(dp), intent(in) :: x1(n1), x2(n2)
+    real(dp), intent(inout) :: D_max(1)
     integer :: i_indx1, i_indx2, i_end, i, j, k, m, below1, below2, this_rank
     integer, allocatable :: tree1(:), tree2(:), cum1(:), cum2(:)
-    real :: x0
-    real :: a1, b1, c1, d1, a2, b2, c2, d2, D(4)
+    real(dp) :: x0
+    real(dp) :: a1, b1, c1, d1, a2, b2, c2, d2, D(4)
 
     ! cum(k) is the number of points of a sample with a rank up to k
     m = max(maxval(rank1), maxval(rank2))
@@ -86,8 +87,8 @@ subroutine maxdist(x1, rank1, x2, rank2, n1, n2, D_max)
         ! write(*,*) n2, a2, b2, c2, d2, a2 + b2 + c2 + d2
 
         ! see Press, William H. Numerical recipes 3rd edition: The art of scientific computing. Cambridge university press, 2007. Section 14.8 for 1/real(n1) term.
-        D = [(a1 - a2 - 1/real(n1)), (b1 - b2), (c1 - c2), (d1 - d2)]
-        D_max(1) = max(D_max(1), maxval(D) + 1/real(n1), -minval(D))
+        D = [(a1 - a2 - 1 / real(n1, dp)), (b1 - b2), (c1 - c2), (d1 - d2)]
+        D_max(1) = max(D_max(1), maxval(D) + 1 / real(n1, dp), -minval(D))
     end do
 
     ! write(*,*) D_max
@@ -97,11 +98,12 @@ end subroutine
 ! i_indx points of a sample lie in x <= x0, below of them in y <= y0, and below_all points of the sample lie in y <= y0.
 subroutine quadct(i_indx, below, below_all, n, a, b, c, d)
     implicit none
+    integer, parameter :: dp = selected_real_kind(15, 307)
     integer, intent(in) :: i_indx, below, below_all, n
-    real, intent(out) :: a, b, c, d
+    real(dp), intent(out) :: a, b, c, d
 
-    a = real(below) / real(n)
-    b = real(i_indx) / real(n) - a
-    c = real(below_all - below) / real(n)
-    d = 1 - real(i_indx) / real(n) - c
+    a = real(below, dp) / real(n, dp)
+    b = real(i_indx, dp) / real(n, dp) - a
+    c = real(below_all - below, dp) / real(n, dp)
+    d = 1 - real(i_indx, dp) / real(n, dp) - c
 end subroutine

@@ -7,7 +7,7 @@ from ndtest.ksnd import avgmaxdist, ks2d2s, maxdist_wraper
 
 
 def sample(rng, n, center=(0.0, 0.0)):
-    """Draw one sample whose x coordinates stay distinct in single precision."""
+    """Draw one sample whose x coordinates stay distinct."""
     x = center[0] + rng.permutation(n) + rng.uniform(0.05, 0.95, size=n)
     y = center[1] + rng.normal(size=n)
     return x, y
@@ -108,22 +108,34 @@ class TestStatistic:
     def test_agrees_with_reference(self, two_samples):
         (x1, y1), (x2, y2) = two_samples
         assert maxdist_wraper(x1, y1, x2, y2) == pytest.approx(
-            reference_maxdist(x1, y1, x2, y2), rel=1e-5, abs=1e-6
+            reference_maxdist(x1, y1, x2, y2), rel=1e-12
         )
         assert maxdist_wraper(x2, y2, x1, y1) == pytest.approx(
-            reference_maxdist(x2, y2, x1, y1), rel=1e-5, abs=1e-6
+            reference_maxdist(x2, y2, x1, y1), rel=1e-12
         )
         expected = (reference_maxdist(x1, y1, x2, y2) + reference_maxdist(x2, y2, x1, y1)) / 2
-        assert avgmaxdist(x1, y1, x2, y2) == pytest.approx(expected, rel=1e-5, abs=1e-6)
+        assert avgmaxdist(x1, y1, x2, y2) == pytest.approx(expected, rel=1e-12)
 
     def test_agrees_with_reference_on_tied_coordinates(self):
         rng = np.random.default_rng(9)
         (x1, y1), (x2, y2) = tied_sample(rng, 60), tied_sample(rng, 80)
         assert maxdist_wraper(x1, y1, x2, y2) == pytest.approx(
-            reference_maxdist(x1, y1, x2, y2), rel=1e-5, abs=1e-6
+            reference_maxdist(x1, y1, x2, y2), rel=1e-12
         )
         assert maxdist_wraper(x2, y2, x1, y1) == pytest.approx(
-            reference_maxdist(x2, y2, x1, y1), rel=1e-5, abs=1e-6
+            reference_maxdist(x2, y2, x1, y1), rel=1e-12
+        )
+
+    def test_agrees_with_reference_beyond_single_precision(self):
+        """Coordinates 1e-3 apart around 1e6 collapse to one value in single precision only."""
+        rng = np.random.default_rng(11)
+        x1, y1 = 1e6 + rng.normal(size=(2, 120)) * 1e-3
+        x2, y2 = 1e6 + rng.normal(size=(2, 90)) * 1e-3
+        assert maxdist_wraper(x1, y1, x2, y2) == pytest.approx(
+            reference_maxdist(x1, y1, x2, y2), rel=1e-12
+        )
+        assert maxdist_wraper(x2, y2, x1, y1) == pytest.approx(
+            reference_maxdist(x2, y2, x1, y1), rel=1e-12
         )
 
     def test_tied_coordinates_do_not_depend_on_the_order_of_the_points(self):
@@ -197,18 +209,19 @@ class TestInputs:
 
 
 class TestExactValues:
-    """Exact single-precision values of the statistic for fixed inputs.
+    """Exact double-precision values of the statistic for fixed inputs.
 
-    The kernel counts in integers and divides once, and a point of the first
-    sample sees the whole group of the points that share its x coordinate, so
-    its result is the same float32 on every platform and for every order of
-    the points, also where the coordinates of a sample have ties.
+    The kernel counts in integers and divides in double precision with a fixed
+    order of operations, and a point of the first sample sees the whole group of
+    the points that share its x coordinate, so its result is the same on every
+    platform and for every order of the points, also where the coordinates of a
+    sample have ties.
     """
 
     def test_continuous_samples(self, two_samples):
         (x1, y1), (x2, y2) = two_samples
-        assert maxdist_wraper(x1, y1, x2, y2) == np.float32(0.14809525)
-        assert maxdist_wraper(x2, y2, x1, y1) == np.float32(0.14761907)
+        assert maxdist_wraper(x1, y1, x2, y2) == 0.14809523809523809
+        assert maxdist_wraper(x2, y2, x1, y1) == 0.14761904761904765
 
     def test_tied_coordinates_in_both_samples(self):
         rng = np.random.default_rng(7)
@@ -216,8 +229,8 @@ class TestExactValues:
         y1 = rng.integers(0, 5, size=30).astype(float)
         x2 = rng.integers(0, 5, size=40).astype(float) + rng.choice([0.0, 0.5])
         y2 = rng.integers(0, 5, size=40).astype(float)
-        assert maxdist_wraper(x1, y1, x2, y2) == np.float32(0.32500002)
-        assert maxdist_wraper(x2, y2, x1, y1) == np.float32(0.30833334)
+        assert maxdist_wraper(x1, y1, x2, y2) == 0.32499999999999996
+        assert maxdist_wraper(x2, y2, x1, y1) == 0.30833333333333335
 
     def test_tied_y_and_tied_x_of_the_second_sample(self):
         rng = np.random.default_rng(7)
@@ -225,15 +238,4 @@ class TestExactValues:
         y1 = rng.integers(0, 5, size=30).astype(float)
         x2 = rng.integers(0, 5, size=40).astype(float) + rng.choice([0.0, 0.5])
         y2 = rng.integers(0, 5, size=40).astype(float)
-        assert maxdist_wraper(x1, y1, x2, y2) == np.float32(0.83333337)
-
-    def test_coordinates_beyond_single_precision_resolution(self):
-        rng = np.random.default_rng(11)
-        x1 = 1e6 + rng.normal(size=120) * 1e-3
-        y1 = 1e6 + rng.normal(size=120) * 1e-3
-        x2 = 1e6 + rng.normal(size=90) * 1e-3
-        y2 = 1e6 + rng.normal(size=90) * 1e-3
-        # in single precision every coordinate of a sample is the same value, so the
-        # two samples fall into one point and the statistic is the 1/n of the first sample
-        assert maxdist_wraper(x1, y1, x2, y2) == np.float32(1 / 120)
-        assert maxdist_wraper(x2, y2, x1, y1) == np.float32(1 / 90)
+        assert maxdist_wraper(x1, y1, x2, y2) == 0.8333333333333334

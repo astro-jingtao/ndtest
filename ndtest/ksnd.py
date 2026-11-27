@@ -105,10 +105,10 @@ def maxdist_wraper(x1: np.ndarray, y1: np.ndarray, x2: np.ndarray, y2: np.ndarra
     # The kernel counts a group of equal x coordinates as a whole, so the order of tied points,
     # which differs between sort algorithms and CPUs, does not reach the statistic.
     order1, order2 = np.argsort(x1), np.argsort(x2)
-    # The kernel counts in single precision, so y coordinates are ranked as float32: two of them
-    # are equal for the kernel exactly when they have the same rank.
-    _, rank = np.unique(np.concatenate([y1, y2]).astype(np.float32), return_inverse=True)
+    # The dense ranks of the y coordinates over both samples: two coordinates are equal exactly
+    # when they have the same rank.
+    _, rank = np.unique(np.concatenate([y1, y2]), return_inverse=True)
     rank1, rank2 = rank[: len(x1)], rank[len(x1) :]
-    D_max = np.zeros(1, dtype=np.float32)
+    D_max = np.zeros(1, dtype=np.float64)
     maxdist(x1[order1], rank1[order1] + 1, x2[order2], rank2[order2] + 1, D_max)
     return D_max[0]
