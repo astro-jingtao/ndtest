@@ -51,13 +51,12 @@ fortran_args = fc.get_supported_arguments('-funroll-loops')
 # The Fortran compiler links the extension: the runtime of the kernel is
 # libgfortran, which the gfortran driver adds and controls.
 # On Windows the runtime libraries of the GNU toolchain (libgfortran, libgcc,
-# libquadmath) are linked statically instead of being loaded as DLLs, so the
-# import needs no directory of the toolchain on PATH.
+# libquadmath, libwinpthread) are linked statically: `-static` makes the linker
+# take the static archives of the toolchain instead of the import libraries of
+# its DLLs, so the import needs no directory of the toolchain on PATH.
 fortran_link_args = []
 if host_machine.system() == 'windows'
-  fortran_link_args += fc.get_supported_link_arguments([
-    '-static-libgfortran', '-static-libgcc', '-static-libquadmath',
-  ])
+  fortran_link_args += fc.get_supported_link_arguments(['-static'])
 endif
 
 # The numpy headers expose, by default, a C-API version that each numpy
