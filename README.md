@@ -3,6 +3,7 @@
 ndtest is a high-performance implementation of 2D Kolmogorov–Smirnov test, inspired by the original project of the same name ([syrte/ndtest](https://github.com/syrte/ndtest)). The following optimizations have been implemented to improve the performance:
 
 - **FORTRAN Backend**: The core components have been rewritten in FORTRAN to achieve significant performance improvements. FORTRAN code is seamlessly integrated into Python via `f2py`.
+- **Sorted sweep**: The kernel visits the points in the order of their x coordinate and keeps the quadrant counts in Fenwick trees over the y ranks, so one evaluation takes (n1 + n2) log(n1 + n2) steps instead of n1 (n1 + n2).
 - **Parallelization**: Utilizing `joblib` for parallel processing, the framework now efficiently calculates p-values using bootstrap resampling.
 
 ## Usage
@@ -40,16 +41,18 @@ On Windows a [MinGW-w64](https://www.mingw-w64.org/) toolchain provides both the
 
 ## Performance
 
-`tools/benchmark_ks2d2s.py` times one call of the Fortran kernel and one call of `ks2d2s` with its analytic p-value, on two samples of standard normal points each (the second one with y = x + noise). The times below are the minimum of 7 batches of 2 calls, measured on an Intel Xeon Gold 6248 CPU @ 2.50GHz with gfortran 8.5.0, Python 3.9 and numpy 1.26.4.
+`tools/benchmark_ks2d2s.py` times one evaluation of the statistic in one direction and one call of `ks2d2s` with its analytic p-value, on two samples of standard normal points each (the second one with y = x + noise). The times below are the minimum of 7 batches, measured on an Intel Xeon Gold 6248 CPU @ 2.50GHz with gfortran 8.5.0, Python 3.9 and numpy 2.0.2.
 
-| Points per sample | Fortran kernel | `ks2d2s` with analytic p-value |
-|-------------------|----------------|-------------------------------|
-| 1,000             | 0.9 ms         | 3.5 ms                        |
-| 5,000             | 20 ms          | 44 ms                         |
-| 10,000            | 79 ms          | 163 ms                        |
-| 20,000            | 327 ms         | 709 ms                        |
+| Points per sample | One direction | `ks2d2s` with analytic p-value |
+|-------------------|---------------|-------------------------------|
+| 1,000             | 0.15 ms       | 1.8 ms                        |
+| 5,000             | 0.8 ms        | 3.1 ms                        |
+| 10,000            | 2.0 ms        | 5.6 ms                        |
+| 20,000            | 4.1 ms        | 16 ms                         |
+| 50,000            | 11 ms         | 38 ms                         |
+| 100,000           | 25 ms         | 80 ms                         |
 
-The kernel compares every point of the first sample with all points, so its running time grows with the square of the sample size. `ks2d2s` evaluates the kernel once per direction and averages the two statistics. A bootstrap p-value evaluates the statistic once per resample: with `nboot=100` and 10,000 points per sample, the kernel runs 200 times for about 16 s in total, spread over `n_jobs` processes.
+One direction sorts both samples by x, ranks the y coordinates and runs the Fortran kernel, so its running time grows with (n1 + n2) log(n1 + n2). `ks2d2s` evaluates the statistic once per direction and averages the two. A bootstrap p-value evaluates the statistic once per direction for every resample: with `nboot=100` and 10,000 points per sample, the 200 evaluations take about 0.5 s on one process. `n_jobs` spreads the resamples over processes, which pays off when the evaluations take seconds: the same call takes 0.9 s with `n_jobs=2`, and 50,000 points per sample take 2.5 s against 1.9 s.
 
 To measure on your machine, install the package and run `python tools/benchmark_ks2d2s.py --n 10000`.
 

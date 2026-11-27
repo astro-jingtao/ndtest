@@ -1,8 +1,8 @@
 """Measure the running time of the two-dimensional Kolmogorov-Smirnov test.
 
 Two samples of `--n` standard normal points are drawn. Sample 1 has independent
-coordinates and sample 2 has y = x + noise. The script times one call of the
-Fortran kernel and one call of `ks2d2s` with its analytic p-value.
+coordinates and sample 2 has y = x + noise. The script times one evaluation of
+the statistic in one direction and one call of `ks2d2s` with its analytic p-value.
 """
 
 from __future__ import annotations
@@ -12,10 +12,9 @@ from collections.abc import Callable
 import statistics
 import time
 
-from ndtest.maxdist import maxdist
 import numpy as np
 
-from ndtest.ksnd import ks2d2s
+from ndtest.ksnd import ks2d2s, maxdist_wraper
 
 
 def samples(n: int, seed: int) -> tuple[np.ndarray, ...]:
@@ -27,9 +26,17 @@ def samples(n: int, seed: int) -> tuple[np.ndarray, ...]:
     return x1, y1, x2, y2
 
 
-def per_call_ms(func: Callable[[], object], repeats: int, number: int = 2) -> tuple[float, float]:
-    """Return the smallest and the median time of one call, in milliseconds."""
+def per_call_ms(
+    func: Callable[[], object], repeats: int, min_batch: float = 0.1
+) -> tuple[float, float]:
+    """Return the smallest and the median time of one call, in milliseconds.
+
+    A batch holds as many calls as take about `min_batch` seconds.
+    """
     func()
+    start = time.perf_counter()
+    func()
+    number = max(1, int(min_batch / (time.perf_counter() - start)))
     times = []
     for _ in range(repeats):
         start = time.perf_counter()
@@ -48,18 +55,16 @@ def main() -> None:
     args = parser.parse_args()
 
     x1, y1, x2, y2 = samples(args.n, args.seed)
-    sort1, sort2 = np.argsort(x1) + 1, np.argsort(x2) + 1
-    d_max = np.zeros(1, dtype=np.float32)
 
-    def kernel() -> None:
-        maxdist(x1, y1, sort1, x2, y2, sort2, d_max)
+    def one_direction() -> None:
+        maxdist_wraper(x1, y1, x2, y2)
 
     def test() -> None:
         ks2d2s(x1, y1, x2, y2)
 
-    for label, func in (("kernel", kernel), ("ks2d2s", test)):
+    for label, func in (("one direction", one_direction), ("ks2d2s", test)):
         smallest, median = per_call_ms(func, args.repeats)
-        print(f"{label:7s} n={args.n}: min {smallest:.1f} ms, median {median:.1f} ms")
+        print(f"{label:14s} n={args.n}: min {smallest:.2f} ms, median {median:.2f} ms")
 
 
 if __name__ == "__main__":

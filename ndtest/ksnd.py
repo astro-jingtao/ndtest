@@ -102,9 +102,13 @@ def avgmaxdist(x1: np.ndarray, y1: np.ndarray, x2: np.ndarray, y2: np.ndarray) -
 
 
 def maxdist_wraper(x1: np.ndarray, y1: np.ndarray, x2: np.ndarray, y2: np.ndarray) -> np.floating:
-    # A stable sort keeps the order of equal coordinates the same on every CPU.
-    sort1 = np.argsort(x1, kind="stable")
-    sort2 = np.argsort(x2, kind="stable")
+    # The kernel counts a group of equal x coordinates as a whole, so the order of tied points,
+    # which differs between sort algorithms and CPUs, does not reach the statistic.
+    sort1 = np.argsort(x1)
+    sort2 = np.argsort(x2)
+    # The kernel counts in single precision, so y coordinates are ranked as float32: two of them
+    # are equal for the kernel exactly when they have the same rank.
+    _, rank = np.unique(np.concatenate([y1, y2]).astype(np.float32), return_inverse=True)
     D_max = np.zeros(1, dtype=np.float32)
-    maxdist(x1, y1, sort1 + 1, x2, y2, sort2 + 1, D_max)
+    maxdist(x1, sort1 + 1, rank[: len(x1)] + 1, x2, sort2 + 1, rank[len(x1) :] + 1, D_max)
     return D_max[0]
