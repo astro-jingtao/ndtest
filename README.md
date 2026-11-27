@@ -36,7 +36,7 @@ Python 3.9 to 3.13 are supported. If the installation stops with `ERROR: Unknown
 
 ### Windows
 
-On Windows a [MinGW-w64](https://www.mingw-w64.org/) toolchain provides both the C and the Fortran compiler that the build needs, for example the `mingw` package of [Chocolatey](https://chocolatey.org/) (`choco install mingw`), whose `bin` directory the package adds to `PATH`. The runtime DLLs of the toolchain must stay reachable on `PATH` when `ndtest` is imported.
+On Windows a [MinGW-w64](https://www.mingw-w64.org/) toolchain provides both the C and the Fortran compiler that the build needs, for example the `mingw` package of [Chocolatey](https://chocolatey.org/) (`choco install mingw`), whose `bin` directory the package adds to `PATH` for new shells. The toolchain is needed to install only: its runtime libraries are linked into the extension, so `ndtest` imports without the toolchain on `PATH`.
 
 ## Performance
 

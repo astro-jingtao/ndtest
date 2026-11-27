@@ -4,7 +4,7 @@ Open work and the decision that each item waits for. Every item names the curren
 
 ## Packaging
 
-- Build wheels for Linux, macOS and Windows with [cibuildwheel](https://cibuildwheel.pypa.io/) and attach them to a GitHub release. Current state: `pip install` compiles the Fortran kernel on the installing machine, which therefore needs a Fortran compiler and a C compiler. Intended state: a pushed version tag builds the wheels, the release carries them, and users install without a compiler. Open point: the Windows wheel must ship the runtime DLLs of the Fortran toolchain (the `libgfortran-*`, `libgcc_s_*` and `libquadmath-*` DLLs) next to the extension, because the installing machine has no toolchain on `PATH`. Verification: `pip download ndtest==<version>` on all three platforms, then importing the installed wheel in a clean environment.
+- Build wheels for Linux, macOS and Windows with [cibuildwheel](https://cibuildwheel.pypa.io/) and attach them to a GitHub release. Current state: `pip install` compiles the Fortran kernel on the installing machine, which therefore needs a Fortran compiler and a C compiler. Intended state: a pushed version tag builds the wheels, the release carries them, and users install without a compiler. The Windows wheel needs no DLL of the toolchain next to the extension: the extension imports `KERNEL32.dll`, the C runtime of Windows and the interpreter DLL only. Verification: `pip download ndtest==<version>` on all three platforms, then importing the installed wheel in a clean environment whose `PATH` holds no compiler.
 
 ## Naming
 
