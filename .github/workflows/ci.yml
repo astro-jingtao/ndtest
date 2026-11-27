@@ -67,6 +67,16 @@ jobs:
         # `pytest` and not `python -m pytest`: the latter puts the checkout
         # first on sys.path, where the package has no compiled extension.
         run: pytest
+      - name: Show the DLL dependencies of the extension (Windows)
+        if: runner.os == 'Windows'
+        continue-on-error: true
+        run: |
+          where.exe gfortran
+          $site = python -c "import sysconfig; print(sysconfig.get_paths()['purelib'])"
+          $pyd = Get-ChildItem "$site\ndtest\maxdist*.pyd"
+          $pyd.FullName
+          objdump -p $pyd.FullName | Select-String "DLL Name"
+          ($env:PATH -split ';') | Where-Object { $_ -match 'mingw|msys' }
 
   sdist:
     name: sdist, wheel from sdist, install

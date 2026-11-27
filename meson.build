@@ -48,10 +48,23 @@ quadmath_dep = fc.find_library('quadmath', required: false)
 # is kept only where the compiler accepts it.
 fortran_args = fc.get_supported_arguments('-funroll-loops')
 
-# The numpy headers expose, by default, the C-API version of whichever numpy
-# runs the build; the compiled module then refuses older numpy at import. The
-# target is pinned to the API of numpy 1.25/1.26 so the runtime floor declared
-# in pyproject.toml holds whatever numpy the build environment carries.
+# On Windows the extension links the runtime libraries of the GNU toolchain
+# (libgfortran, libgcc, libquadmath) statically instead of loading their DLLs,
+# so the import needs no directory of the toolchain on PATH.
+fortran_link_args = []
+if host_machine.system() == 'windows'
+  fortran_link_args += fc.get_supported_link_arguments([
+    '-static-libgfortran', '-static-libgcc', '-static-libquadmath',
+  ])
+endif
+
+# The numpy headers expose, by default, a C-API version that each numpy
+# release sets for downstream packages (numpy 2.0: 1.19, numpy 2.5: 1.25) and
+# that rises over time; a module compiled for a newer API refuses older numpy
+# at import. The target is pinned to the API of numpy 1.25 so the runtime
+# floor declared in pyproject.toml holds whatever numpy the build environment
+# carries. The pin sets no upper bound: numpy accepts modules compiled for an
+# older API.
 numpy_api_target = ['-DNPY_TARGET_VERSION=NPY_1_25_API_VERSION']
 
 py.extension_module(
@@ -65,6 +78,7 @@ py.extension_module(
   dependencies: [py.dependency(), quadmath_dep],
   c_args: numpy_api_target,
   fortran_args: fortran_args,
+  link_args: fortran_link_args,
   install: true,
   subdir: 'ndtest',
 )
