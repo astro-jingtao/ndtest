@@ -56,6 +56,12 @@ jobs:
       - name: Install a Fortran compiler (macOS)
         if: runner.os == 'macOS'
         run: command -v gfortran || brew install gfortran
+      - name: PROBE temporary, install the Chocolatey toolchain
+        if: runner.os == 'Windows'
+        run: choco install mingw -y --no-progress
+      - name: PROBE temporary, put the Chocolatey toolchain on PATH
+        if: runner.os == 'Windows'
+        run: echo "C:\ProgramData\mingw64\mingw64\bin" >> $env:GITHUB_PATH
       - name: Install the package with its test dependencies
         # The latest pip builds in an isolated environment, which is the
         # installation path of a user; the build fetches numpy, meson-python
