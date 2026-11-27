@@ -56,12 +56,6 @@ jobs:
       - name: Install a Fortran compiler (macOS)
         if: runner.os == 'macOS'
         run: command -v gfortran || brew install gfortran
-      - name: PROBE temporary, install the Chocolatey toolchain
-        if: runner.os == 'Windows'
-        run: choco install mingw -y --no-progress
-      - name: PROBE temporary, put the Chocolatey toolchain on PATH
-        if: runner.os == 'Windows'
-        run: echo "C:\ProgramData\mingw64\mingw64\bin" >> $env:GITHUB_PATH
       - name: Install the package with its test dependencies
         # The latest pip builds in an isolated environment, which is the
         # installation path of a user; the build fetches numpy, meson-python
@@ -73,17 +67,6 @@ jobs:
         # `pytest` and not `python -m pytest`: the latter puts the checkout
         # first on sys.path, where the package has no compiled extension.
         run: pytest
-      - name: PROBE temporary, removed by the next commit
-        if: runner.os == 'Windows'
-        run: |
-          gfortran --version | Select-Object -First 1
-          $pyd = python -I -c "import ndtest.maxdist; print(ndtest.maxdist.__file__)"
-          objdump -p $pyd | Select-String 'DLL Name'
-          $env:PATH -split ';' | Where-Object { $_ -match 'mingw' } | ForEach-Object { "toolchain on PATH: $_" }
-          $env:PATH = ($env:PATH -split ';' | Where-Object { $_ -notmatch 'mingw' }) -join ';'
-          python -I -c "import ndtest.maxdist; print('import without the toolchain on PATH: ok')"
-          "exit code of the import: $LASTEXITCODE"
-          exit 0
 
   sdist:
     name: sdist, wheel from sdist, install
