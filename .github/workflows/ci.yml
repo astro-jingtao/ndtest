@@ -51,12 +51,11 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
+      # Only the macOS image ships no Fortran compiler; the Linux images carry
+      # gfortran and the Windows image a MinGW-w64 toolchain in C:\mingw64\bin.
       - name: Install a Fortran compiler (macOS)
         if: runner.os == 'macOS'
         run: command -v gfortran || brew install gfortran
-      - name: Install a Fortran compiler (Windows)
-        if: runner.os == 'Windows'
-        run: choco install mingw -y --no-progress
       - name: Install the package with its test dependencies
         # The latest pip builds in an isolated environment, which is the
         # installation path of a user; the build fetches numpy, meson-python
