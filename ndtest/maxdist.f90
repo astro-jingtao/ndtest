@@ -3,13 +3,14 @@ subroutine maxdist(x1, y1, sort1, x2, y2, sort2, n1, n2, D_max)
     integer, intent(in) :: n1, n2, sort1(n1), sort2(n2)
     real, intent(in) :: x1(n1), y1(n1), x2(n2), y2(n2)
     real, intent(inout) :: D_max(1)
-    integer :: i_indx1, i_indx2
+    integer :: i_indx1, i_indx2, i_end
     real :: this_y1
     real :: y1_sorted(n1), y2_sorted(n2)
     real :: a1, b1, c1, d1, a2, b2, c2, d2, D(4)
 
     D_max(1) = 0
     i_indx2 = 0
+    i_end = 0
     ! the y coordinates in the x order of their sample: quadct then counts over contiguous sections
     y1_sorted = y1(sort1)
     y2_sorted = y2(sort2)
@@ -21,10 +22,19 @@ subroutine maxdist(x1, y1, sort1, x2, y2, sort2, n1, n2, D_max)
             i_indx2 = i_indx2 + 1
         end do
 
+        ! i_end is the last point of sample 1 with the x of the current point: the quadrant x <= x1
+        ! holds the whole tie group, whichever member of the group is the origin
+        if (i_indx1 > i_end) then
+            i_end = i_indx1
+            do while ((i_end < n1).and.(x1(sort1(i_end+1)) == x1(sort1(i_indx1))))
+                i_end = i_end + 1
+            end do
+        end if
+
         this_y1 = y1_sorted(i_indx1)
 
         ! write(*,*) x1(sort1(i_indx1))
-        call quadct(y1_sorted, n1, i_indx1, this_y1, a1, b1, c1, d1)
+        call quadct(y1_sorted, n1, i_end, this_y1, a1, b1, c1, d1)
         ! write(*,*) n1, a1, b1, c1, d1, a1 + b1 + c1 + d1
 
         call quadct(y2_sorted, n2, i_indx2, this_y1, a2, b2, c2, d2)

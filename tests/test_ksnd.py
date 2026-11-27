@@ -13,13 +13,22 @@ def sample(rng, n, center=(0.0, 0.0)):
     return x, y
 
 
+def tied_sample(rng, n, values=5):
+    """Draw one sample from a small grid, so that many coordinates coincide."""
+    x = rng.integers(0, values, size=n).astype(float)
+    y = rng.integers(0, values, size=n).astype(float)
+    return x, y
+
+
 def reference_maxdist(x1, y1, x2, y2):
     """Largest difference between the two empirical distribution functions.
 
     At every point of the first sample, the plane is cut into the four
     quadrants and the fractions of both samples in each quadrant are compared.
-    This is the definition of the statistic, evaluated in double precision and
-    without any sorting, so it is slow and independent of the Fortran kernel.
+    A quadrant holds every point on its edge, so a point of the first sample
+    sees the points that share its x coordinate. This is the definition of the
+    statistic, evaluated in double precision and without any sorting, so it is
+    slow and independent of the Fortran kernel.
     """
     n1 = len(x1)
     largest = 0.0
@@ -75,6 +84,12 @@ class TestStatistic:
         d, _ = ks2d2s(x, y, x, y)
         assert d == pytest.approx(1 / 400, rel=1e-5)
 
+    def test_identical_tied_samples_give_one_over_n(self):
+        rng = np.random.default_rng(6)
+        x, y = tied_sample(rng, 400)
+        d, _ = ks2d2s(x, y, x, y)
+        assert d == pytest.approx(1 / 400, rel=1e-5)
+
     def test_separated_samples_give_the_largest_possible_difference(self):
         rng = np.random.default_rng(2)
         x1, y1 = sample(rng, 200)
@@ -100,6 +115,25 @@ class TestStatistic:
         )
         expected = (reference_maxdist(x1, y1, x2, y2) + reference_maxdist(x2, y2, x1, y1)) / 2
         assert avgmaxdist(x1, y1, x2, y2) == pytest.approx(expected, rel=1e-5, abs=1e-6)
+
+    def test_agrees_with_reference_on_tied_coordinates(self):
+        rng = np.random.default_rng(9)
+        (x1, y1), (x2, y2) = tied_sample(rng, 60), tied_sample(rng, 80)
+        assert maxdist_wraper(x1, y1, x2, y2) == pytest.approx(
+            reference_maxdist(x1, y1, x2, y2), rel=1e-5, abs=1e-6
+        )
+        assert maxdist_wraper(x2, y2, x1, y1) == pytest.approx(
+            reference_maxdist(x2, y2, x1, y1), rel=1e-5, abs=1e-6
+        )
+
+    def test_tied_coordinates_do_not_depend_on_the_order_of_the_points(self):
+        rng = np.random.default_rng(8)
+        x1, y1 = tied_sample(rng, 60)
+        x2, y2 = tied_sample(rng, 80)
+        statistic = maxdist_wraper(x1, y1, x2, y2)
+        for _ in range(20):
+            order1, order2 = rng.permutation(60), rng.permutation(80)
+            assert maxdist_wraper(x1[order1], y1[order1], x2[order2], y2[order2]) == statistic
 
     def test_average_does_not_depend_on_sample_order(self, two_samples):
         (x1, y1), (x2, y2) = two_samples
@@ -165,9 +199,10 @@ class TestInputs:
 class TestExactValues:
     """Exact single-precision values of the statistic for fixed inputs.
 
-    The kernel counts in integers and divides once, and the sort that feeds it
-    is stable, so its result is the same float32 on every platform, also where
-    the coordinates of a sample have ties.
+    The kernel counts in integers and divides once, and a point of the first
+    sample sees the whole group of the points that share its x coordinate, so
+    its result is the same float32 on every platform and for every order of
+    the points, also where the coordinates of a sample have ties.
     """
 
     def test_continuous_samples(self, two_samples):
@@ -182,7 +217,7 @@ class TestExactValues:
         x2 = rng.integers(0, 5, size=40).astype(float) + rng.choice([0.0, 0.5])
         y2 = rng.integers(0, 5, size=40).astype(float)
         assert maxdist_wraper(x1, y1, x2, y2) == np.float32(0.32500002)
-        assert maxdist_wraper(x2, y2, x1, y1) == np.float32(0.3)
+        assert maxdist_wraper(x2, y2, x1, y1) == np.float32(0.30833334)
 
     def test_tied_y_and_tied_x_of_the_second_sample(self):
         rng = np.random.default_rng(7)
@@ -198,5 +233,7 @@ class TestExactValues:
         y1 = 1e6 + rng.normal(size=120) * 1e-3
         x2 = 1e6 + rng.normal(size=90) * 1e-3
         y2 = 1e6 + rng.normal(size=90) * 1e-3
-        assert maxdist_wraper(x1, y1, x2, y2) == np.float32(1.0)
-        assert maxdist_wraper(x2, y2, x1, y1) == np.float32(1.0)
+        # in single precision every coordinate of a sample is the same value, so the
+        # two samples fall into one point and the statistic is the 1/n of the first sample
+        assert maxdist_wraper(x1, y1, x2, y2) == np.float32(1 / 120)
+        assert maxdist_wraper(x2, y2, x1, y1) == np.float32(1 / 90)

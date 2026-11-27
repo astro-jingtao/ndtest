@@ -23,6 +23,7 @@
 
 ### Fixed
 
+- The statistic of data with duplicate x coordinates in the first sample was wrong: a point saw only the points before it in the sorted order, not the points that share its x coordinate. The kernel now counts the whole group, so the result agrees with the definition of the statistic and does not depend on the order of the points.
 - Installing with pip >= 25.3 failed while preparing the metadata, because `setup.py` imported numpy in the isolated build environment.
 - Building failed with `UnicodeDecodeError` when `charset_normalizer` was not installed; the Fortran source is ASCII now.
 - Installing on Windows with Python >= 3.12 or setuptools >= 74 failed when moving a `.libs` directory that the meson build does not create.
