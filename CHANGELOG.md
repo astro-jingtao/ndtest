@@ -20,6 +20,8 @@
 - The Fortran kernel visits the points in the order of their x coordinate and keeps the quadrant counts in Fenwick trees over the y ranks, so its running time grows with (n1 + n2) log(n1 + n2) instead of n1 (n1 + n2). `ks2d2s` on two samples of 10,000 points takes about 5.5 ms on an Intel Xeon Gold 6248 with gfortran 8.5, and 80 ms at 100,000 points.
 - The Fortran kernel computes the statistic in double precision, with no loss in running time. Coordinates that differ only below single precision are told apart now, and the statistic differs from the one of the single-precision kernel beyond the seventh digit.
 - The README states the one requirement left for the installation (a Fortran compiler), shows the usage of `ks2d2s`, replaces the performance table with measurements of the current build, and describes the development setup.
+- The package description names what the package provides: a two-dimensional two-sample Kolmogorov-Smirnov test with a Fortran kernel.
+- The docstring of `ks2d2s` states that the coordinates are array-likes, that the analytic p-value is an approximation and the bootstrap p-value an estimate, and its typos are corrected.
 - `maxdist.f90` declares `D_max` as a one-element array, which is the shape `ksnd.py` passes.
 
 ### Fixed

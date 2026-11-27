@@ -26,29 +26,29 @@ def ks2d2s(
     """Two-dimensional Kolmogorov-Smirnov test on two samples.
     Parameters
     ----------
-    x1, y1 : ndarray, shape (n1, )
+    x1, y1 : array_like, shape (n1,)
         Data of sample 1.
-    x2, y2 : ndarray, shape (n2, )
-        Data of sample 2. Size of two samples can be different.
+    x2, y2 : array_like, shape (n2,)
+        Data of sample 2. The two samples may have different sizes.
     nboot : None or int
-        Number of bootstrap resample to estimate the p-value. A large number is expected.
-        If None, an approximate analytic estimate will be used.
+        Number of bootstrap resamples that estimate the p-value; a large number is expected.
+        If None, an analytic approximation of the p-value is used.
     n_jobs : int, optional
-        The number of jobs to use for the bootstrap resampling based p-value estimation. If -1, all CPUs are used.
+        The number of jobs used for the bootstrap p-value. If -1, all CPUs are used.
     rng : `numpy.random.Generator`, optional
         Pseudorandom number generator for the bootstrap resamples. When `rng` is None, a new `numpy.random.Generator` is created using entropy from the operating system. Types other than `numpy.random.Generator` are passed to `numpy.random.default_rng` to instantiate a `Generator`.
 
     Returns
     -------
-    D : float, optional
+    D : float
         KS statistic.
     p : float
         Two-tailed p-value.
 
     Notes
     -----
-    This is the two-sided K-S test. Small p-values means that the two samples are significantly different.
-    Note that the p-value is only an approximation as the analytic distribution is unkonwn. The approximation
+    This is the two-sided K-S test. Small p-values mean that the two samples are significantly different.
+    With `nboot=None` the p-value is an approximation, as the analytic distribution of the statistic is unknown. The approximation
     is accurate enough when N > ~20 and p-value < ~0.20 or so. When p-value > 0.20, the value may not be accurate,
     but it certainly implies that the two samples are not significantly different. (cf. Press 2007)
 
