@@ -37,7 +37,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
         exclude:
           # setup-python ships no 3.9 for ubuntu-latest (26.04); the 3.9
           # floor runs on the 24.04 image, where the interpreter exists
