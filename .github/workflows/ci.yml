@@ -68,7 +68,7 @@ jobs:
         # first on sys.path, where the package has no compiled extension.
         run: pytest
       - name: Show the DLL dependencies of the extension (Windows)
-        if: runner.os == 'Windows'
+        if: always() && runner.os == 'Windows'
         continue-on-error: true
         run: |
           where.exe gfortran

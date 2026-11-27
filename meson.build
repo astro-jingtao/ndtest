@@ -48,9 +48,11 @@ quadmath_dep = fc.find_library('quadmath', required: false)
 # is kept only where the compiler accepts it.
 fortran_args = fc.get_supported_arguments('-funroll-loops')
 
-# On Windows the extension links the runtime libraries of the GNU toolchain
-# (libgfortran, libgcc, libquadmath) statically instead of loading their DLLs,
-# so the import needs no directory of the toolchain on PATH.
+# The Fortran compiler links the extension: the runtime of the kernel is
+# libgfortran, which the gfortran driver adds and controls.
+# On Windows the runtime libraries of the GNU toolchain (libgfortran, libgcc,
+# libquadmath) are linked statically instead of being loaded as DLLs, so the
+# import needs no directory of the toolchain on PATH.
 fortran_link_args = []
 if host_machine.system() == 'windows'
   fortran_link_args += fc.get_supported_link_arguments([
@@ -79,6 +81,7 @@ py.extension_module(
   c_args: numpy_api_target,
   fortran_args: fortran_args,
   link_args: fortran_link_args,
+  link_language: 'fortran',
   install: true,
   subdir: 'ndtest',
 )
