@@ -102,8 +102,9 @@ def avgmaxdist(x1: np.ndarray, y1: np.ndarray, x2: np.ndarray, y2: np.ndarray) -
 
 
 def maxdist_wraper(x1: np.ndarray, y1: np.ndarray, x2: np.ndarray, y2: np.ndarray) -> np.floating:
-    sort1 = np.argsort(x1)
-    sort2 = np.argsort(x2)
+    # A stable sort keeps the order of equal coordinates the same on every CPU.
+    sort1 = np.argsort(x1, kind="stable")
+    sort2 = np.argsort(x2, kind="stable")
     D_max = np.zeros(1, dtype=np.float32)
     maxdist(x1, y1, sort1 + 1, x2, y2, sort2 + 1, D_max)
     return D_max[0]

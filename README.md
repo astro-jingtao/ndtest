@@ -44,10 +44,10 @@ On Windows a [MinGW-w64](https://www.mingw-w64.org/) toolchain provides both the
 
 | Points per sample | Fortran kernel | `ks2d2s` with analytic p-value |
 |-------------------|----------------|-------------------------------|
-| 1,000             | 0.9 ms         | 3.6 ms                        |
-| 5,000             | 20 ms          | 43 ms                         |
+| 1,000             | 0.9 ms         | 3.5 ms                        |
+| 5,000             | 20 ms          | 44 ms                         |
 | 10,000            | 79 ms          | 163 ms                        |
-| 20,000            | 327 ms         | 699 ms                        |
+| 20,000            | 327 ms         | 709 ms                        |
 
 The kernel compares every point of the first sample with all points, so its running time grows with the square of the sample size. `ks2d2s` evaluates the kernel once per direction and averages the two statistics. A bootstrap p-value evaluates the statistic once per resample: with `nboot=100` and 10,000 points per sample, the kernel runs 200 times for about 16 s in total, spread over `n_jobs` processes.
 

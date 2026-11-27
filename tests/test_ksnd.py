@@ -105,15 +105,6 @@ class TestStatistic:
         (x1, y1), (x2, y2) = two_samples
         assert avgmaxdist(x1, y1, x2, y2) == avgmaxdist(x2, y2, x1, y1)
 
-    def test_tied_x_coordinates_give_a_statistic_within_the_bounds(self):
-        rng = np.random.default_rng(7)
-        x1 = rng.integers(0, 5, size=30).astype(float)
-        y1 = rng.integers(0, 5, size=30).astype(float)
-        x2 = rng.integers(0, 5, size=40).astype(float)
-        y2 = rng.integers(0, 5, size=40).astype(float)
-        assert 0 <= maxdist_wraper(x1, y1, x2, y2) <= 1
-        assert 0 <= maxdist_wraper(x2, y2, x1, y1) <= 1
-
 
 class TestPValue:
     def test_identical_samples_are_not_rejected(self):
@@ -174,16 +165,24 @@ class TestInputs:
 class TestExactValues:
     """Exact single-precision values of the statistic for fixed inputs.
 
-    The kernel counts in integers and divides once, so its result is the same
-    float32 on every platform as long as the x coordinates of the first sample
-    have no ties: with such ties the count follows the order of tied elements,
-    which the default `numpy.argsort` does not keep.
+    The kernel counts in integers and divides once, and the sort that feeds it
+    is stable, so its result is the same float32 on every platform, also where
+    the coordinates of a sample have ties.
     """
 
     def test_continuous_samples(self, two_samples):
         (x1, y1), (x2, y2) = two_samples
         assert maxdist_wraper(x1, y1, x2, y2) == np.float32(0.14809525)
         assert maxdist_wraper(x2, y2, x1, y1) == np.float32(0.14761907)
+
+    def test_tied_coordinates_in_both_samples(self):
+        rng = np.random.default_rng(7)
+        x1 = rng.integers(0, 5, size=30).astype(float)
+        y1 = rng.integers(0, 5, size=30).astype(float)
+        x2 = rng.integers(0, 5, size=40).astype(float) + rng.choice([0.0, 0.5])
+        y2 = rng.integers(0, 5, size=40).astype(float)
+        assert maxdist_wraper(x1, y1, x2, y2) == np.float32(0.32500002)
+        assert maxdist_wraper(x2, y2, x1, y1) == np.float32(0.3)
 
     def test_tied_y_and_tied_x_of_the_second_sample(self):
         rng = np.random.default_rng(7)

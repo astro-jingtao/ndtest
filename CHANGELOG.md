@@ -16,6 +16,7 @@
 
 - The build uses the meson-python backend with a `meson.build` of its own; `setup.py` and its call into `f2py -c` are removed. One build path now serves every platform and Python version, and Windows no longer moves a `.libs` directory after the build.
 - `nboot` and `n_jobs` of `ks2d2s` are keyword-only arguments.
+- `maxdist_wraper` sorts with a stable algorithm, so the statistic of data with tied coordinates is the same on every platform; the default sort orders tied coordinates by the sort implementation of the CPU, which gave different results on x86-64 and arm64.
 - The Fortran kernel is built with loop unrolling and counts over y coordinates that are sorted by x. This makes the test about 25% faster than in 0.3.0 with the same results: `ks2d2s` on two samples of 10,000 points takes about 160 ms on an Intel Xeon Gold 6248 with gfortran 8.5 (0.3.0: about 210 ms).
 - The README states the one requirement left for the installation (a Fortran compiler), shows the usage of `ks2d2s`, replaces the performance table with measurements of the current build, and describes the development setup.
 - `maxdist.f90` declares `D_max` as a one-element array, which is the shape `ksnd.py` passes.
