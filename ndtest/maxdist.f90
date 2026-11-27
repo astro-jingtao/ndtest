@@ -1,30 +1,25 @@
 ! Largest difference between the empirical distribution functions of two samples, with the points of the first sample as origins.
-! The points are visited in the order of their x coordinate. Two Fenwick trees over the y ranks hold the points with an x coordinate up to the current one, one tree per sample, so that every quadrant count is a sum over the ranks up to the rank of the origin.
-subroutine maxdist(x1, sort1, rank1, x2, sort2, rank2, n1, n2, D_max)
+! The points of each sample arrive in the order of their x coordinate, with the dense rank of their y coordinate. Two Fenwick trees over the y ranks hold the points with an x coordinate up to the current one, one tree per sample, so that every quadrant count is a sum over the ranks up to the rank of the origin.
+subroutine maxdist(x1, rank1, x2, rank2, n1, n2, D_max)
     implicit none
-    integer, intent(in) :: n1, n2, sort1(n1), sort2(n2), rank1(n1), rank2(n2)
+    integer, intent(in) :: n1, n2, rank1(n1), rank2(n2)
     real, intent(in) :: x1(n1), x2(n2)
     real, intent(inout) :: D_max(1)
     integer :: i_indx1, i_indx2, i_end, i, j, k, m, below1, below2, this_rank
-    integer :: rank1_sorted(n1), rank2_sorted(n2)
     integer, allocatable :: tree1(:), tree2(:), cum1(:), cum2(:)
     real :: x0
     real :: a1, b1, c1, d1, a2, b2, c2, d2, D(4)
 
-    ! the ranks in the x order of their sample
-    rank1_sorted = rank1(sort1)
-    rank2_sorted = rank2(sort2)
-    m = max(maxval(rank1_sorted), maxval(rank2_sorted))
-
     ! cum(k) is the number of points of a sample with a rank up to k
+    m = max(maxval(rank1), maxval(rank2))
     allocate (cum1(m), cum2(m), tree1(m), tree2(m))
     cum1 = 0
     cum2 = 0
     do k = 1, n1
-        cum1(rank1_sorted(k)) = cum1(rank1_sorted(k)) + 1
+        cum1(rank1(k)) = cum1(rank1(k)) + 1
     end do
     do k = 1, n2
-        cum2(rank2_sorted(k)) = cum2(rank2_sorted(k)) + 1
+        cum2(rank2(k)) = cum2(rank2(k)) + 1
     end do
     do k = 2, m
         cum1(k) = cum1(k) + cum1(k - 1)
@@ -40,12 +35,12 @@ subroutine maxdist(x1, sort1, rank1, x2, sort2, rank2, n1, n2, D_max)
     i_end = 0
 
     do i_indx1 = 1, n1
-        x0 = x1(sort1(i_indx1))
+        x0 = x1(i_indx1)
 
         ! i_indx2 is the number of sample-2 points with x2 <= x0
-        do while ((i_indx2 < n2) .and. (x2(sort2(i_indx2 + 1)) <= x0))
+        do while ((i_indx2 < n2) .and. (x2(i_indx2 + 1) <= x0))
             i_indx2 = i_indx2 + 1
-            i = rank2_sorted(i_indx2)
+            i = rank2(i_indx2)
             do while (i <= m)
                 tree2(i) = tree2(i) + 1
                 i = i + iand(i, -i)
@@ -56,11 +51,11 @@ subroutine maxdist(x1, sort1, rank1, x2, sort2, rank2, n1, n2, D_max)
         ! holds the whole tie group, whichever member of the group is the origin
         if (i_indx1 > i_end) then
             i_end = i_indx1
-            do while ((i_end < n1) .and. (x1(sort1(i_end + 1)) == x0))
+            do while ((i_end < n1) .and. (x1(i_end + 1) == x0))
                 i_end = i_end + 1
             end do
             do j = i_indx1, i_end
-                i = rank1_sorted(j)
+                i = rank1(j)
                 do while (i <= m)
                     tree1(i) = tree1(i) + 1
                     i = i + iand(i, -i)
@@ -69,7 +64,7 @@ subroutine maxdist(x1, sort1, rank1, x2, sort2, rank2, n1, n2, D_max)
         end if
 
         ! below is the number of inserted points with a rank up to the rank of the origin
-        this_rank = rank1_sorted(i_indx1)
+        this_rank = rank1(i_indx1)
         below1 = 0
         i = this_rank
         do while (i > 0)
