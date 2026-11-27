@@ -4,17 +4,18 @@
 
 ### Added
 
-- `pyproject.toml` declares the build requirements, the runtime dependencies (`numpy>=1.26`, `scipy>=1.10`, `joblib>=1.2`), the supported Python range (3.9 to 3.13) and a `test` extra. `pip install` now builds in an isolated environment without pre-installing numpy, meson, ninja or `charset_normalizer`.
+- `pyproject.toml` declares the build requirements, the runtime dependencies (`numpy>=1.26`, `scipy>=1.10`, `joblib>=1.2`), the supported Python range (3.9 to 3.14) and a `test` extra. `pip install` now builds in an isolated environment without pre-installing numpy, meson, ninja or `charset_normalizer`.
 - The Fortran source ships in the source distribution, so `python -m build` and `pip install` from an sdist work.
 - A test suite under `tests/`: the Fortran kernel against a direct evaluation of the definition of the statistic, the analytic and the bootstrap p-value, and the documented usage. Install with `pip install .[test]` and run `pytest`.
 - `ruff.toml` configures the linter; `ruff format --check .` and `ruff check .` report no findings.
 - `tools/benchmark_ks2d2s.py` measures the running time of the Fortran kernel and of `ks2d2s`.
 - `TODO.md` lists the open items: wheels for the three platforms, the package name on PyPI and the release of 0.4.0.
-- A GitHub Actions workflow: `ruff format --check .` and `ruff check .`; the test suite against an isolated `pip install ".[test]"` on Linux, macOS and Windows for Python 3.9 to 3.13; and a check that builds the sdist, builds a wheel from it, installs the wheel and runs the tests.
+- A GitHub Actions workflow: `ruff format --check .` and `ruff check .`; the test suite against an isolated `pip install ".[test]"` on Linux, macOS and Windows for Python 3.9 to 3.14; and a check that builds the sdist, builds a wheel from it, installs the wheel and runs the tests.
 
 ### Changed
 
 - The build uses the meson-python backend with a `meson.build` of its own; `setup.py` and its call into `f2py -c` are removed. One build path now serves every platform and Python version, and Windows no longer moves a `.libs` directory after the build.
+- The Fortran compiler links the extension. On Windows the runtime libraries of the GNU toolchain (`libgfortran`, `libgcc`, `libquadmath`, `libwinpthread`) are linked statically, so the extension imports the C runtime of Windows and the interpreter DLL only, and the toolchain is needed to install only.
 - `nboot` and `n_jobs` of `ks2d2s` are keyword-only arguments.
 - `ks2d2s` draws its bootstrap resamples from a generator of its own. The keyword argument `rng` takes a seed or a `numpy.random.Generator`, as `numpy.random.default_rng` does; without it the resamples come from a new generator fed by the operating system. `numpy.random.seed` no longer makes the bootstrap repeatable.
 - The Fortran kernel visits the points in the order of their x coordinate and keeps the quadrant counts in Fenwick trees over the y ranks, so its running time grows with (n1 + n2) log(n1 + n2) instead of n1 (n1 + n2). `ks2d2s` on two samples of 10,000 points takes about 5.5 ms on an Intel Xeon Gold 6248 with gfortran 8.5, and 80 ms at 100,000 points.
@@ -30,6 +31,7 @@
 - Installing with pip >= 25.3 failed while preparing the metadata, because `setup.py` imported numpy in the isolated build environment.
 - Building failed with `UnicodeDecodeError` when `charset_normalizer` was not installed; the Fortran source is ASCII now.
 - Installing on Windows with Python >= 3.12 or setuptools >= 74 failed when moving a `.libs` directory that the meson build does not create.
+- The extension built on Windows imported DLLs of the GNU toolchain (`libgfortran`, `libquadmath`, `libwinpthread`), so `import ndtest` failed with `DLL load failed` wherever the toolchain was not on `PATH`, as on the GitHub runner image of 2026-11-23. The extension imports the C runtime of Windows and the interpreter DLL only now.
 
 ## 0.3.0 - 2024-10-29
 
