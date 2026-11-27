@@ -68,6 +68,17 @@ jobs:
         # `pytest` and not `python -m pytest`: the latter puts the checkout
         # first on sys.path, where the package has no compiled extension.
         run: pytest
+      - name: PROBE temporary, removed by the next commit
+        if: runner.os == 'Windows'
+        run: |
+          gfortran --version | Select-Object -First 1
+          $pyd = python -c "import ndtest.maxdist; print(ndtest.maxdist.__file__)"
+          objdump -p $pyd | Select-String 'DLL Name'
+          $env:PATH -split ';' | Where-Object { $_ -match 'mingw' } | ForEach-Object { "toolchain on PATH: $_" }
+          $env:PATH = ($env:PATH -split ';' | Where-Object { $_ -notmatch 'mingw' }) -join ';'
+          python -c "import ndtest.maxdist; print('import without the toolchain on PATH: ok')"
+          "exit code of the import: $LASTEXITCODE"
+          exit 0
 
   sdist:
     name: sdist, wheel from sdist, install
