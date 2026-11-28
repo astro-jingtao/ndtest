@@ -23,6 +23,7 @@ Guide for an agent working in this repository. What holds for humans as well is 
 - `TestExactValues` pins the outputs of the kernel with `==`. The kernel counts in integers and divides in IEEE double precision with a fixed order of operations, so every platform gives the same bits. A change of the order of operations changes the pinned values: re-pin them from a measurement of the new kernel after it agrees with `reference_maxdist` to a relative 1e-12, never from a calculation.
 - A new kernel algorithm is compared bit for bit with the previous one on tied and untied inputs in both directions, and timed with `tools/benchmark_ks2d2s.py`. The table of the README is then re-measured with the tool, which states its environment.
 - The kernel receives each sample in the order of its x coordinate, with 1-based dense y ranks over both samples. `maxdist_wrapper` does the sorting and the ranking and takes numpy arrays only; `ks2d2s` converts its input with `numpy.asarray`.
+- The f2py wrapper releases the GIL during the kernel call (`!f2py threadsafe` in `maxdist.f90`), so the threads of the bootstrap overlap the kernel time as well. The kernel must stay reentrant: no saved state, work arrays allocated on every call. `TestGIL` holds this.
 
 ## Public API
 

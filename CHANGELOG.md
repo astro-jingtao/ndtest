@@ -14,6 +14,7 @@
 - The y coordinates are ranked through one `numpy.argsort` and reach the kernel as 32-bit ranks, the type the kernel takes, instead of through `numpy.unique` and a conversion on the way in. The ranks are the same, and one evaluation of the statistic in one direction takes 4% to 18% less time at 1,000 to 100,000 points per sample.
 - `ks2d2s` on two samples of 10,000 points takes about 3.5 ms on an Intel Xeon Gold 6248 with gfortran 8.5, and 45 ms at 100,000 points (5.5 ms and 80 ms in 0.4.0); the performance table of the README states the measurements of this build.
 - The function `maxdist_wraper` of `ndtest.ksnd`, which sorts and ranks the points for the kernel, is named `maxdist_wrapper`.
+- The Fortran kernel releases the GIL during its call, so the threads of the bootstrap overlap the kernel time of the resamples as well as their sorting and ranking. With `nboot=100`, `n_jobs=4` takes about half the time it took while the kernel held the GIL (0.14 s against 0.24 s at 10,000 points per sample, 0.6 s against 1.2 s at 50,000), and `n_jobs=2` about 70%. The statistic is the same bit for bit, and the running time of one evaluation does not change.
 
 ### Fixed
 

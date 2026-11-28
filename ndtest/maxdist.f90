@@ -1,6 +1,8 @@
 ! Largest difference between the empirical distribution functions of two samples, with the points of the first sample as origins.
 ! The points of each sample arrive in the order of their x coordinate, with the dense rank of their y coordinate. Two Fenwick trees over the y ranks hold the points with an x coordinate up to the current one, one tree per sample, so that every quadrant count is a sum over the ranks up to the rank of the origin.
 subroutine maxdist(x1, rank1, x2, rank2, n1, n2, D_max)
+    ! The wrapper releases the GIL around the call, so threads may run the kernel at the same time: the kernel must stay reentrant, with no saved state and its work arrays allocated on every call.
+    !f2py threadsafe
     implicit none
     integer, parameter :: dp = selected_real_kind(15, 307)
     integer, intent(in) :: n1, n2, rank1(n1), rank2(n2)

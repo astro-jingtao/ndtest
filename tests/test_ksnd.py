@@ -1,10 +1,14 @@
 """Tests of the two-dimensional two-sample Kolmogorov-Smirnov test."""
 
+import threading
+import time
+
 import numpy as np
 import pytest
 from scipy.stats import kstwobign, pearsonr
 
 from ndtest.ksnd import avgmaxdist, dense_rank, ks2d2s, maxdist_wrapper
+from ndtest.maxdist import maxdist
 
 
 def sample(rng, n, center=(0.0, 0.0)):
@@ -289,3 +293,37 @@ class TestDenseRank:
         )
         for values in samples:
             assert np.array_equal(dense_rank(values), np.unique(values, return_inverse=True)[1])
+
+
+class TestGIL:
+    def test_the_kernel_releases_the_gil_during_its_call(self):
+        # A second thread waits for the call to start and notes when it next runs:
+        # during the call only if the kernel lets go of the GIL, right after it otherwise.
+        rng = np.random.default_rng(0)
+        (x1, y1), (x2, y2) = sample(rng, 300_000), sample(rng, 300_000)
+        order1, order2 = np.argsort(x1), np.argsort(x2)
+        rank = dense_rank(np.concatenate([y1, y2]))
+        arguments = (
+            x1[order1],
+            rank[: len(x1)][order1] + 1,
+            x2[order2],
+            rank[len(x1) :][order2] + 1,
+            np.zeros(1),
+        )
+        maxdist(*arguments)
+        start = [None]
+        first_run = [None]
+
+        def note_first_run():
+            while first_run[0] is None:
+                if start[0] is not None:
+                    first_run[0] = time.perf_counter()
+
+        watcher = threading.Thread(target=note_first_run)
+        watcher.start()
+        time.sleep(0.05)
+        start[0] = time.perf_counter()
+        maxdist(*arguments)
+        end = time.perf_counter()
+        watcher.join()
+        assert first_run[0] - start[0] < (end - start[0]) / 4

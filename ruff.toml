@@ -225,6 +225,9 @@ max-statements = 50
 # Combine compatible aliased imports and sort names within each import section.
 combine-as-imports = true
 force-sort-within-sections = true
+# `ndtest.maxdist` is a compiled extension without a .py file, so the source scan
+# cannot tell that it is part of the package.
+known-first-party = ["ndtest"]
 split-on-trailing-comma = true
 
 [lint.flake8-tidy-imports]
