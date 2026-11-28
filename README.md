@@ -20,7 +20,7 @@ D, p = ks2d2s(x1, y1, x2, y2)
 
 `ks2d2s` takes the coordinates of two samples and returns the KS statistic `D`, computed in double precision, and the two-tailed p-value `p`. Small p-values mean that the two samples are significantly different. The coordinates are one-dimensional array-likes of equal length within each sample, and the two samples may have different sizes.
 
-By default (`nboot=None`) the p-value is an analytic approximation. With `nboot=N`, `N` bootstrap resamples of the pooled sample estimate the p-value instead; `n_jobs` sets the number of parallel jobs (`-1` uses all CPUs), `backend` chooses the joblib backend that runs them (see Performance), and `rng` makes the resamples repeatable: it takes a seed or a `numpy.random.Generator`, as `numpy.random.default_rng` does. All four are keyword arguments.
+By default (`nboot=None`) the p-value is an analytic approximation. With `nboot=N`, `N` bootstrap resamples of the pooled sample estimate the p-value instead; `n_jobs` sets the number of parallel jobs (`-1` uses all CPUs), `backend` chooses the joblib backend that runs them, threads by default (see Performance), and `rng` makes the resamples repeatable: it takes a seed or a `numpy.random.Generator`, as `numpy.random.default_rng` does. All four are keyword arguments.
 
 ## Installation
 
@@ -54,14 +54,14 @@ On Windows a [MinGW-w64](https://www.mingw-w64.org/) toolchain provides both the
 
 One direction sorts both samples by x, ranks the y coordinates and runs the Fortran kernel, so its running time grows with (n1 + n2) log(n1 + n2). `ks2d2s` evaluates the statistic once per direction and averages the two.
 
-A bootstrap p-value evaluates the statistic once per direction for every resample: with `nboot=100` and 10,000 points per sample, the 200 evaluations take about 0.36 s serially, and 50,000 points per sample take 2.2 s. `n_jobs` spreads the resamples over workers and `backend` chooses what joblib runs them in; which one pays off is the caller's decision, and the times below are those of the first call in a process with `nboot=100`:
+A bootstrap p-value evaluates the statistic once per direction for every resample: with `nboot=100` and 10,000 points per sample, the 200 evaluations take about 0.36 s serially, and 50,000 points per sample take 2.2 s. `n_jobs` spreads the resamples over workers; `backend` chooses what joblib runs them in, threads by default, and the times below are those of the first call in a process with `nboot=100`:
 
-| Points per sample | `n_jobs=2`, processes (default) | `n_jobs=2`, `backend="threading"` | `n_jobs=4`, processes | `n_jobs=4`, `backend="threading"` |
-|-------------------|---------------------------------|-----------------------------------|-----------------------|-----------------------------------|
-| 10,000            | 0.9 s                           | 0.27 s                            | 0.8 s                 | 0.24 s                            |
-| 50,000            | 2.0 s                           | 1.5 s                             | 1.3 s                 | 1.2 s                             |
+| Points per sample | `n_jobs=2`, threads (default) | `n_jobs=4`, threads (default) | `n_jobs=2`, processes (`backend="loky"`) | `n_jobs=4`, processes |
+|-------------------|-------------------------------|-------------------------------|------------------------------------------|-----------------------|
+| 10,000            | 0.21 s                        | 0.14 s                        | 0.9 s                                    | 0.8 s                 |
+| 50,000            | 1.1 s                         | 0.63 s                        | 2.0 s                                    | 1.4 s                 |
 
-The default backend starts worker processes, which costs about 0.5 s that the first call pays in full; a process that calls `ks2d2s` again reuses the workers, and 50,000 points then take 0.8 s with `n_jobs=4`. `backend="threading"` starts no workers and overlaps the sorting and ranking of the resamples, which release the GIL; the Fortran kernel holds it, so the kernel time of the resamples does not overlap. `backend` takes every backend joblib knows, and `None` leaves the choice to joblib, so a `joblib.parallel_backend` context of the caller applies.
+The Fortran kernel and the numpy sorting release the GIL, so the threads run at the same time and start no worker processes. Processes pay about 0.5 s of worker start-up on the first call; a process that calls `ks2d2s` again reuses the workers, and 50,000 points then take 0.73 s with `n_jobs=4`, against 0.6 s with four threads. `backend` takes every backend joblib knows, and `None` leaves the choice to joblib, so a `joblib.parallel_backend` context of the caller applies.
 
 To measure on your machine, install the package and run `python tools/benchmark_ks2d2s.py --n 10000`.
 

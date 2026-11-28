@@ -22,7 +22,7 @@ def ks2d2s(
     nboot: int | None = None,
     n_jobs: int = 1,
     rng: np.random.Generator | int | None = None,
-    backend: str | None = None,
+    backend: str | None = "threading",
 ) -> tuple[np.floating, np.floating]:
     """Two-dimensional Kolmogorov-Smirnov test on two samples.
     Parameters
@@ -39,7 +39,7 @@ def ks2d2s(
     rng : `numpy.random.Generator`, optional
         Pseudorandom number generator for the bootstrap resamples. When `rng` is None, a new `numpy.random.Generator` is created using entropy from the operating system. Types other than `numpy.random.Generator` are passed to `numpy.random.default_rng` to instantiate a `Generator`.
     backend : str, optional
-        The joblib backend that runs the bootstrap resamples when `n_jobs` is not 1, for example `"threading"` or `"loky"`. None leaves the choice to joblib, so a `joblib.parallel_backend` context of the caller applies.
+        The joblib backend that runs the bootstrap resamples when `n_jobs` is not 1. The default `"threading"` runs them in threads of the calling process, which start no worker processes; the Fortran kernel and the sorting release the GIL, so the threads run at the same time. None leaves the choice to joblib, so a `joblib.parallel_backend` context of the caller applies.
 
     Returns
     -------

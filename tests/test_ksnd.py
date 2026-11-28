@@ -3,6 +3,7 @@
 import threading
 import time
 
+from joblib import Parallel
 import numpy as np
 import pytest
 from scipy.stats import kstwobign, pearsonr
@@ -217,6 +218,18 @@ class TestPValue:
         _, p_threads = ks2d2s(x1, y1, x2, y2, nboot=20, n_jobs=2, backend="threading", rng=0)
         _, p_serial = ks2d2s(x1, y1, x2, y2, nboot=20, n_jobs=1, rng=0)
         assert p_threads == p_serial
+
+    def test_bootstrap_runs_in_threads_by_default(self, two_samples, monkeypatch):
+        (x1, y1), (x2, y2) = two_samples
+        backends = []
+
+        def spy(**kwargs):
+            backends.append(kwargs["backend"])
+            return Parallel(**kwargs)
+
+        monkeypatch.setattr("ndtest.ksnd.Parallel", spy)
+        ks2d2s(x1, y1, x2, y2, nboot=10, n_jobs=2, rng=0)
+        assert backends == ["threading"]
 
     def test_bootstrap_is_repeatable_for_a_seed(self, two_samples):
         (x1, y1), (x2, y2) = two_samples

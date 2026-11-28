@@ -5,7 +5,7 @@
 ### Added
 
 - Python 3.15 is supported: `pyproject.toml` declares it, the README lists it and the CI matrix tests it on Linux, macOS and Windows.
-- `ks2d2s` takes the keyword argument `backend`, the joblib backend that runs the bootstrap resamples when `n_jobs` is not 1; `None`, the default, leaves the choice to joblib. `backend="threading"` starts no worker processes and is the faster choice for a single call: with `nboot=100` and `n_jobs=2`, 0.27 s against 0.9 s at 10,000 points per sample. The README states the measured times of both backends and why the threads overlap only the sorting and ranking.
+- `ks2d2s` takes the keyword argument `backend`, the joblib backend that runs the bootstrap resamples when `n_jobs` is not 1. It is `"threading"` by default: the resamples run in threads of the calling process and start no worker processes, so the first call with `nboot=100` and `n_jobs=2` takes 0.21 s instead of the 0.9 s of joblib's own default of processes at 10,000 points per sample. `None` leaves the choice to joblib, so a `joblib.parallel_backend` context of the caller applies. The README states the measured times of both backends.
 - `TODO.md` lists two planned tests: the Kolmogorov-Smirnov test in more than two dimensions and the energy test of raddest.
 
 ### Changed
