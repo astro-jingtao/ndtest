@@ -14,7 +14,7 @@ import time
 
 import numpy as np
 
-from ndtest.ksnd import ks2d2s, maxdist_wraper
+from ndtest.ksnd import ks2d2s, maxdist_wrapper
 
 
 def samples(n: int, seed: int) -> tuple[np.ndarray, ...]:
@@ -57,7 +57,7 @@ def main() -> None:
     x1, y1, x2, y2 = samples(args.n, args.seed)
 
     def one_direction() -> None:
-        maxdist_wraper(x1, y1, x2, y2)
+        maxdist_wrapper(x1, y1, x2, y2)
 
     def test() -> None:
         ks2d2s(x1, y1, x2, y2)

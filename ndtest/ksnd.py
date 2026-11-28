@@ -99,12 +99,12 @@ def ks2d2s(
 
 
 def avgmaxdist(x1: np.ndarray, y1: np.ndarray, x2: np.ndarray, y2: np.ndarray) -> np.floating:
-    D1 = maxdist_wraper(x1, y1, x2, y2)
-    D2 = maxdist_wraper(x2, y2, x1, y1)
+    D1 = maxdist_wrapper(x1, y1, x2, y2)
+    D2 = maxdist_wrapper(x2, y2, x1, y1)
     return (D1 + D2) / 2
 
 
-def maxdist_wraper(x1: np.ndarray, y1: np.ndarray, x2: np.ndarray, y2: np.ndarray) -> np.floating:
+def maxdist_wrapper(x1: np.ndarray, y1: np.ndarray, x2: np.ndarray, y2: np.ndarray) -> np.floating:
     # The kernel counts a group of equal x coordinates as a whole, so the order of tied points,
     # which differs between sort algorithms and CPUs, does not reach the statistic.
     order1, order2 = np.argsort(x1), np.argsort(x2)

@@ -24,6 +24,7 @@
 - The package description names what the package provides: a two-dimensional two-sample Kolmogorov-Smirnov test with a Fortran kernel.
 - The docstring of `ks2d2s` states that the coordinates are array-likes, that the analytic p-value is an approximation and the bootstrap p-value an estimate, and its typos are corrected.
 - `maxdist.f90` declares `D_max` as a one-element array, which is the shape `ksnd.py` passes.
+- The function `maxdist_wraper` of `ndtest.ksnd`, which sorts and ranks the points for the kernel, is named `maxdist_wrapper`.
 
 ### Fixed
 

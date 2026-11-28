@@ -5,7 +5,7 @@ Guide for an agent working in this repository. What holds for humans as well is 
 ## Layout
 
 - `ndtest/maxdist.f90`: the Fortran kernel. `maxdist` returns the largest difference between the two empirical distribution functions with the points of the first sample as origins; `quadct` turns the counts of one origin into the four quadrant fractions.
-- `ndtest/ksnd.py`: the Python API. `ks2d2s` is the public function; `avgmaxdist` averages the two directions; `maxdist_wraper` sorts, ranks and calls the kernel.
+- `ndtest/ksnd.py`: the Python API. `ks2d2s` is the public function; `avgmaxdist` averages the two directions; `maxdist_wrapper` sorts, ranks and calls the kernel.
 - `tests/test_ksnd.py`: the test suite. `reference_maxdist` in it evaluates the definition of the statistic without sorting.
 - `tools/benchmark_ks2d2s.py`: the timing behind the table of the README.
 - `meson.build`: the f2py build; the version of the package is declared here.
@@ -22,7 +22,7 @@ Guide for an agent working in this repository. What holds for humans as well is 
 - The statistic does not depend on the order of the points: a point of the first sample sees every point that shares its x coordinate. `test_tied_coordinates_do_not_depend_on_the_order_of_the_points` holds this; a kernel change keeps it green.
 - `TestExactValues` pins the outputs of the kernel with `==`. The kernel counts in integers and divides in IEEE double precision with a fixed order of operations, so every platform gives the same bits. A change of the order of operations changes the pinned values: re-pin them from a measurement of the new kernel after it agrees with `reference_maxdist` to a relative 1e-12, never from a calculation.
 - A new kernel algorithm is compared bit for bit with the previous one on tied and untied inputs in both directions, and timed with `tools/benchmark_ks2d2s.py`. The table of the README is then re-measured with the tool, which states its environment.
-- The kernel receives each sample in the order of its x coordinate, with 1-based dense y ranks over both samples. `maxdist_wraper` does the sorting and the ranking and takes numpy arrays only; `ks2d2s` converts its input with `numpy.asarray`.
+- The kernel receives each sample in the order of its x coordinate, with 1-based dense y ranks over both samples. `maxdist_wrapper` does the sorting and the ranking and takes numpy arrays only; `ks2d2s` converts its input with `numpy.asarray`.
 
 ## Public API
 

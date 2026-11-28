@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from ndtest.ksnd import avgmaxdist, ks2d2s, maxdist_wraper
+from ndtest.ksnd import avgmaxdist, ks2d2s, maxdist_wrapper
 
 
 def sample(rng, n, center=(0.0, 0.0)):
@@ -85,7 +85,7 @@ class TestStatistic:
         rng = np.random.default_rng(2)
         x1, y1 = sample(rng, 200)
         x2, y2 = sample(rng, 300, center=(1000.0, 50.0))
-        assert maxdist_wraper(x1, y1, x2, y2) == 1.0
+        assert maxdist_wrapper(x1, y1, x2, y2) == 1.0
         d, _ = ks2d2s(x1, y1, x2, y2)
         assert d > 0.9
 
@@ -98,10 +98,10 @@ class TestStatistic:
 
     def test_agrees_with_reference(self, two_samples):
         (x1, y1), (x2, y2) = two_samples
-        assert maxdist_wraper(x1, y1, x2, y2) == pytest.approx(
+        assert maxdist_wrapper(x1, y1, x2, y2) == pytest.approx(
             reference_maxdist(x1, y1, x2, y2), rel=1e-12
         )
-        assert maxdist_wraper(x2, y2, x1, y1) == pytest.approx(
+        assert maxdist_wrapper(x2, y2, x1, y1) == pytest.approx(
             reference_maxdist(x2, y2, x1, y1), rel=1e-12
         )
         expected = (reference_maxdist(x1, y1, x2, y2) + reference_maxdist(x2, y2, x1, y1)) / 2
@@ -110,10 +110,10 @@ class TestStatistic:
     def test_agrees_with_reference_on_tied_coordinates(self):
         rng = np.random.default_rng(9)
         (x1, y1), (x2, y2) = tied_sample(rng, 60), tied_sample(rng, 80)
-        assert maxdist_wraper(x1, y1, x2, y2) == pytest.approx(
+        assert maxdist_wrapper(x1, y1, x2, y2) == pytest.approx(
             reference_maxdist(x1, y1, x2, y2), rel=1e-12
         )
-        assert maxdist_wraper(x2, y2, x1, y1) == pytest.approx(
+        assert maxdist_wrapper(x2, y2, x1, y1) == pytest.approx(
             reference_maxdist(x2, y2, x1, y1), rel=1e-12
         )
 
@@ -122,10 +122,10 @@ class TestStatistic:
         rng = np.random.default_rng(11)
         x1, y1 = 1e6 + rng.normal(size=(2, 120)) * 1e-3
         x2, y2 = 1e6 + rng.normal(size=(2, 90)) * 1e-3
-        assert maxdist_wraper(x1, y1, x2, y2) == pytest.approx(
+        assert maxdist_wrapper(x1, y1, x2, y2) == pytest.approx(
             reference_maxdist(x1, y1, x2, y2), rel=1e-12
         )
-        assert maxdist_wraper(x2, y2, x1, y1) == pytest.approx(
+        assert maxdist_wrapper(x2, y2, x1, y1) == pytest.approx(
             reference_maxdist(x2, y2, x1, y1), rel=1e-12
         )
 
@@ -133,10 +133,10 @@ class TestStatistic:
         rng = np.random.default_rng(8)
         x1, y1 = tied_sample(rng, 60)
         x2, y2 = tied_sample(rng, 80)
-        statistic = maxdist_wraper(x1, y1, x2, y2)
+        statistic = maxdist_wrapper(x1, y1, x2, y2)
         for _ in range(20):
             order1, order2 = rng.permutation(60), rng.permutation(80)
-            assert maxdist_wraper(x1[order1], y1[order1], x2[order2], y2[order2]) == statistic
+            assert maxdist_wrapper(x1[order1], y1[order1], x2[order2], y2[order2]) == statistic
 
     def test_average_does_not_depend_on_sample_order(self, two_samples):
         (x1, y1), (x2, y2) = two_samples
@@ -235,8 +235,8 @@ class TestExactValues:
 
     def test_continuous_samples(self, two_samples):
         (x1, y1), (x2, y2) = two_samples
-        assert maxdist_wraper(x1, y1, x2, y2) == 0.14809523809523809
-        assert maxdist_wraper(x2, y2, x1, y1) == 0.14761904761904765
+        assert maxdist_wrapper(x1, y1, x2, y2) == 0.14809523809523809
+        assert maxdist_wrapper(x2, y2, x1, y1) == 0.14761904761904765
 
     def test_tied_coordinates_in_both_samples(self):
         rng = np.random.default_rng(7)
@@ -244,8 +244,8 @@ class TestExactValues:
         y1 = rng.integers(0, 5, size=30).astype(float)
         x2 = rng.integers(0, 5, size=40).astype(float) + rng.choice([0.0, 0.5])
         y2 = rng.integers(0, 5, size=40).astype(float)
-        assert maxdist_wraper(x1, y1, x2, y2) == 0.32499999999999996
-        assert maxdist_wraper(x2, y2, x1, y1) == 0.30833333333333335
+        assert maxdist_wrapper(x1, y1, x2, y2) == 0.32499999999999996
+        assert maxdist_wrapper(x2, y2, x1, y1) == 0.30833333333333335
 
     def test_tied_y_and_tied_x_of_the_second_sample(self):
         rng = np.random.default_rng(7)
@@ -253,4 +253,4 @@ class TestExactValues:
         y1 = rng.integers(0, 5, size=30).astype(float)
         x2 = rng.integers(0, 5, size=40).astype(float) + rng.choice([0.0, 0.5])
         y2 = rng.integers(0, 5, size=40).astype(float)
-        assert maxdist_wraper(x1, y1, x2, y2) == 0.8333333333333334
+        assert maxdist_wrapper(x1, y1, x2, y2) == 0.8333333333333334
