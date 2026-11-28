@@ -110,8 +110,21 @@ def maxdist_wrapper(x1: np.ndarray, y1: np.ndarray, x2: np.ndarray, y2: np.ndarr
     order1, order2 = np.argsort(x1), np.argsort(x2)
     # The dense ranks of the y coordinates over both samples: two coordinates are equal exactly
     # when they have the same rank.
-    _, rank = np.unique(np.concatenate([y1, y2]), return_inverse=True)
+    rank = dense_rank(np.concatenate([y1, y2]))
     rank1, rank2 = rank[: len(x1)], rank[len(x1) :]
     D_max = np.zeros(1, dtype=np.float64)
     maxdist(x1[order1], rank1[order1] + 1, x2[order2], rank2[order2] + 1, D_max)
     return D_max[0]
+
+
+def dense_rank(values: np.ndarray) -> np.ndarray:
+    """Dense rank of each value among the distinct values: 0 for the smallest, equal values share a rank."""
+    order = np.argsort(values)
+    sorted_values = values[order]
+    # new_value[i] is True where the i-th smallest value differs from the one before it
+    new_value = np.empty(len(values), dtype=bool)
+    new_value[0] = True
+    new_value[1:] = sorted_values[1:] != sorted_values[:-1]
+    rank = np.empty(len(values), dtype=np.int32)
+    rank[order] = np.cumsum(new_value, dtype=np.int32) - 1
+    return rank

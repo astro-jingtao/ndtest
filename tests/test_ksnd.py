@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from scipy.stats import kstwobign, pearsonr
 
-from ndtest.ksnd import avgmaxdist, ks2d2s, maxdist_wrapper
+from ndtest.ksnd import avgmaxdist, dense_rank, ks2d2s, maxdist_wrapper
 
 
 def sample(rng, n, center=(0.0, 0.0)):
@@ -270,3 +270,16 @@ class TestExactValues:
         x2 = rng.integers(0, 5, size=40).astype(float) + rng.choice([0.0, 0.5])
         y2 = rng.integers(0, 5, size=40).astype(float)
         assert maxdist_wrapper(x1, y1, x2, y2) == 0.8333333333333334
+
+
+class TestDenseRank:
+    def test_agrees_with_numpy_unique(self):
+        rng = np.random.default_rng(13)
+        samples = (
+            rng.normal(size=500),
+            rng.integers(0, 5, size=500).astype(float),
+            np.ones(500),
+            np.arange(500.0),
+        )
+        for values in samples:
+            assert np.array_equal(dense_rank(values), np.unique(values, return_inverse=True)[1])
