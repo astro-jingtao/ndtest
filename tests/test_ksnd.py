@@ -208,6 +208,12 @@ class TestPValue:
         _, p_parallel = ks2d2s(x1, y1, x2, y2, nboot=50, n_jobs=2, rng=0)
         assert p_serial == p_parallel
 
+    def test_bootstrap_runs_in_the_requested_backend(self, two_samples):
+        (x1, y1), (x2, y2) = two_samples
+        _, p_threads = ks2d2s(x1, y1, x2, y2, nboot=20, n_jobs=2, backend="threading", rng=0)
+        _, p_serial = ks2d2s(x1, y1, x2, y2, nboot=20, n_jobs=1, rng=0)
+        assert p_threads == p_serial
+
     def test_bootstrap_is_repeatable_for_a_seed(self, two_samples):
         (x1, y1), (x2, y2) = two_samples
         _, p_first = ks2d2s(x1, y1, x2, y2, nboot=100, rng=3)

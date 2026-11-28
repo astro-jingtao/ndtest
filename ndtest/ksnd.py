@@ -22,6 +22,7 @@ def ks2d2s(
     nboot: int | None = None,
     n_jobs: int = 1,
     rng: np.random.Generator | int | None = None,
+    backend: str | None = None,
 ) -> tuple[np.floating, np.floating]:
     """Two-dimensional Kolmogorov-Smirnov test on two samples.
     Parameters
@@ -37,6 +38,8 @@ def ks2d2s(
         The number of jobs used for the bootstrap p-value. If -1, all CPUs are used.
     rng : `numpy.random.Generator`, optional
         Pseudorandom number generator for the bootstrap resamples. When `rng` is None, a new `numpy.random.Generator` is created using entropy from the operating system. Types other than `numpy.random.Generator` are passed to `numpy.random.default_rng` to instantiate a `Generator`.
+    backend : str, optional
+        The joblib backend that runs the bootstrap resamples when `n_jobs` is not 1, for example `"threading"` or `"loky"`. None leaves the choice to joblib, so a `joblib.parallel_backend` context of the caller applies.
 
     Returns
     -------
@@ -88,7 +91,7 @@ def ks2d2s(
             idx = rng.choice(n, n, replace=True)
             ix1_ix2_lst.append((idx[:n1], idx[n1:]))
 
-        with Parallel(n_jobs=n_jobs) as parallel:
+        with Parallel(n_jobs=n_jobs, backend=backend) as parallel:
             d = parallel(
                 delayed(avgmaxdist)(x[ix1], y[ix1], x[ix2], y[ix2]) for ix1, ix2 in ix1_ix2_lst
             )
