@@ -93,7 +93,7 @@ def ks2d2s(
                 delayed(avgmaxdist)(x[ix1], y[ix1], x[ix2], y[ix2]) for ix1, ix2 in ix1_ix2_lst
             )
 
-        p = np.sum(d > D).astype("f") / nboot
+        p = np.mean(np.asarray(d) > D)
 
     return D, p
 

@@ -32,6 +32,7 @@
 - Building failed with `UnicodeDecodeError` when `charset_normalizer` was not installed; the Fortran source is ASCII now.
 - Installing on Windows with Python >= 3.12 or setuptools >= 74 failed when moving a `.libs` directory that the meson build does not create.
 - The extension built on Windows imported DLLs of the GNU toolchain (`libgfortran`, `libquadmath`, `libwinpthread`), so `import ndtest` failed with `DLL load failed` wherever the toolchain was not on `PATH`, as on the GitHub runner image of 2026-11-23. The extension imports the C runtime of Windows and the interpreter DLL only now.
+- The bootstrap p-value was a single-precision number (`numpy.float32`), so one third of the resamples came out as 0.33333334; it is a double-precision number now.
 
 ## 0.3.0 -- 2024-10-29
 

@@ -170,6 +170,11 @@ class TestPValue:
         assert 0 <= p <= 1
         assert p * nboot == pytest.approx(round(p * nboot))
 
+    def test_bootstrap_p_value_is_double_precision(self, two_samples):
+        (x1, y1), (x2, y2) = two_samples
+        _, p = ks2d2s(x1, y1, x2, y2, nboot=100)
+        assert p.dtype == np.float64
+
     def test_bootstrap_identical_samples_are_not_rejected(self):
         rng = np.random.default_rng(5)
         x, y = sample(rng, 300)
