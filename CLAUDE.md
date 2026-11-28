@@ -9,7 +9,7 @@ Guide for an agent working in this repository. What holds for humans as well is 
 - `tests/test_ksnd.py`: the test suite. `reference_maxdist` in it evaluates the definition of the statistic without sorting.
 - `tools/benchmark_ks2d2s.py`: the timing behind the table of the README.
 - `meson.build`: the f2py build; the version of the package is declared here.
-- `TODO.md`, `CHANGELOG.md`: open items, and the changes since the last release under the heading of the version they belong to.
+- `TODO.md`, `CHANGELOG.md`: open items, and the changes since the last release under `## Unreleased` and those of each version under its heading.
 
 ## Build and verification
 
@@ -31,6 +31,6 @@ Guide for an agent working in this repository. What holds for humans as well is 
 
 ## Conventions
 
-- Conventional commits in English. The CHANGELOG describes the change from the last release for a user of the package. Its sections are headed `## <version> -- <date>`, where the date is the day the work on the version was completed; changes that land later go under the same heading. A version counts as released in the CHANGELOG once its changes are gathered under its number: whether it is published on GitHub or PyPI is not expressed there, `TODO.md` tracks that.
+- Conventional commits in English. The CHANGELOG describes the change from the last release for a user of the package. Changes in progress are gathered under `## Unreleased`. A release renames that heading to `## <version> -- <date>`, where the date is the day the work on the version was completed, and puts the tag `v<version>` on that commit; changes that land after a release go under a new `## Unreleased` heading. Publishing a version on GitHub or PyPI is a separate step that `TODO.md` tracks.
 - numpy-style docstrings, pytest class-based tests, absolute imports.
 - The numpy C-API target is pinned in `meson.build` (`NPY_TARGET_VERSION=NPY_1_25_API_VERSION`). It is the lowest numpy the compiled module accepts, so it stays at or below the `numpy>=` floor of `pyproject.toml`; it sets no upper bound.
