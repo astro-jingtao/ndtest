@@ -41,16 +41,16 @@ On Windows a [MinGW-w64](https://www.mingw-w64.org/) toolchain provides both the
 
 ## Performance
 
-`tools/benchmark_ks2d2s.py` times one evaluation of the statistic in one direction and one call of `ks2d2s` with its analytic p-value, on two samples of standard normal points each (the second one with y = x + noise). The times below are the minimum of 7 batches, measured on an Intel Xeon Gold 6248 CPU @ 2.50GHz with gfortran 8.5.0, Python 3.9 and numpy 2.0.2.
+`tools/benchmark_ks2d2s.py` times one evaluation of the statistic in one direction and one call of `ks2d2s` with its analytic p-value, on two samples of standard normal points each (the second one with y = x + noise). The times below are the minimum of 7 batches in the fastest of 30 runs, measured on an Intel Xeon Gold 6248 CPU @ 2.50GHz with gfortran 8.5.0, Python 3.9 and numpy 2.0.2.
 
 | Points per sample | One direction | `ks2d2s` with analytic p-value |
 |-------------------|---------------|-------------------------------|
-| 1,000             | 0.15 ms       | 1.9 ms                        |
-| 5,000             | 0.8 ms        | 3.1 ms                        |
-| 10,000            | 1.6 ms        | 5.5 ms                        |
-| 20,000            | 3.8 ms        | 15 ms                         |
-| 50,000            | 11 ms         | 38 ms                         |
-| 100,000           | 27 ms         | 81 ms                         |
+| 1,000             | 0.14 ms       | 0.55 ms                       |
+| 5,000             | 0.73 ms       | 1.8 ms                        |
+| 10,000            | 1.6 ms        | 3.5 ms                        |
+| 20,000            | 3.6 ms        | 7.8 ms                        |
+| 50,000            | 10 ms         | 21 ms                         |
+| 100,000           | 22 ms         | 45 ms                         |
 
 One direction sorts both samples by x, ranks the y coordinates and runs the Fortran kernel, so its running time grows with (n1 + n2) log(n1 + n2). `ks2d2s` evaluates the statistic once per direction and averages the two.
 
