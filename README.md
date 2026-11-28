@@ -33,7 +33,7 @@ pip install git+https://github.com/astro-jingtao/ndtest.git
 # pip install git+https://gitee.com/the-wind-is-still-like-snow/ndtest.git
 ```
 
-Python 3.9 to 3.14 are supported. If the installation stops with `ERROR: Unknown compiler(s): [['gfortran'], ['flang-new'], ...]`, no Fortran compiler was found.
+Python 3.9 to 3.15 are supported. If the installation stops with `ERROR: Unknown compiler(s): [['gfortran'], ['flang-new'], ...]`, no Fortran compiler was found.
 
 ### Windows
 

@@ -4,13 +4,13 @@
 
 ### Added
 
-- `pyproject.toml` declares the build requirements, the runtime dependencies (`numpy>=1.26`, `scipy>=1.10`, `joblib>=1.2`), the supported Python range (3.9 to 3.14) and a `test` extra. `pip install` now builds in an isolated environment without pre-installing numpy, meson, ninja or `charset_normalizer`.
+- `pyproject.toml` declares the build requirements, the runtime dependencies (`numpy>=1.26`, `scipy>=1.10`, `joblib>=1.2`), the supported Python range (3.9 to 3.15) and a `test` extra. `pip install` now builds in an isolated environment without pre-installing numpy, meson, ninja or `charset_normalizer`.
 - The Fortran source ships in the source distribution, so `python -m build` and `pip install` from an sdist work.
 - A test suite under `tests/`: the Fortran kernel against a direct evaluation of the definition of the statistic, the analytic and the bootstrap p-value, and the documented usage. Install with `pip install .[test]` and run `pytest`.
 - `ruff.toml` configures the linter; `ruff format --check .` and `ruff check .` report no findings.
 - `tools/benchmark_ks2d2s.py` measures the running time of the Fortran kernel and of `ks2d2s`.
 - `TODO.md` lists the open items: wheels for the three platforms, the Kolmogorov-Smirnov test in more than two dimensions, the energy test of raddest, the package name on PyPI and the release of 0.4.0.
-- A GitHub Actions workflow: `ruff format --check .` and `ruff check .`; the test suite against an isolated `pip install ".[test]"` on Linux, macOS and Windows for Python 3.9 to 3.14; and a check that builds the sdist, builds a wheel from it, installs the wheel and runs the tests.
+- A GitHub Actions workflow: `ruff format --check .` and `ruff check .`; the test suite against an isolated `pip install ".[test]"` on Linux, macOS and Windows for Python 3.9 to 3.15; and a check that builds the sdist, builds a wheel from it, installs the wheel and runs the tests.
 
 ### Changed
 
