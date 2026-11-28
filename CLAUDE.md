@@ -31,6 +31,6 @@ Guide for an agent working in this repository. What holds for humans as well is 
 
 ## Conventions
 
-- Conventional commits in English. The CHANGELOG describes the change from the last release for a user of the package.
+- Conventional commits in English. The CHANGELOG describes the change from the last release for a user of the package. Its sections are headed `## <version> -- <date>`, where the date is the day the work on the version was completed; changes that land later go under the same heading. A version counts as released in the CHANGELOG once its changes are gathered under its number: whether it is published on GitHub or PyPI is not expressed there, `TODO.md` tracks that.
 - numpy-style docstrings, pytest class-based tests, absolute imports.
 - The numpy C-API target is pinned in `meson.build` (`NPY_TARGET_VERSION=NPY_1_25_API_VERSION`). It is the lowest numpy the compiled module accepts, so it stays at or below the `numpy>=` floor of `pyproject.toml`; it sets no upper bound.

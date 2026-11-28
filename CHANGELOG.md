@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.4.0 - unreleased
+## 0.4.0 -- 2026-11-27
 
 ### Added
 
@@ -33,7 +33,7 @@
 - Installing on Windows with Python >= 3.12 or setuptools >= 74 failed when moving a `.libs` directory that the meson build does not create.
 - The extension built on Windows imported DLLs of the GNU toolchain (`libgfortran`, `libquadmath`, `libwinpthread`), so `import ndtest` failed with `DLL load failed` wherever the toolchain was not on `PATH`, as on the GitHub runner image of 2026-11-23. The extension imports the C runtime of Windows and the interpreter DLL only now.
 
-## 0.3.0 - 2024-10-29
+## 0.3.0 -- 2024-10-29
 
 ### Added
 - Performance in with different backend in README.
@@ -45,7 +45,7 @@
 ### Changed
 - Do not require `numpy<2`
 
-## 0.2.0 - 2024-10-29
+## 0.2.0 -- 2024-10-29
 
 ### Added
 
@@ -55,7 +55,7 @@
   - FORTRAN compiler can not be found.
 - Support to use on Windows.
 
-## 0.1.0 - 2024-10-29
+## 0.1.0 -- 2024-10-29
 
 ### Added
 
