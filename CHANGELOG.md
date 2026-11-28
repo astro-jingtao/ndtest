@@ -23,6 +23,7 @@
 - The README states the one requirement left for the installation (a Fortran compiler), shows the usage of `ks2d2s`, replaces the performance table with measurements of the current build, and describes the development setup.
 - The package description names what the package provides: a two-dimensional two-sample Kolmogorov-Smirnov test with a Fortran kernel.
 - The docstring of `ks2d2s` states that the coordinates are array-likes, that the analytic p-value is an approximation and the bootstrap p-value an estimate, and its typos are corrected.
+- The analytic p-value takes the correlation of the coordinates from `numpy.corrcoef` instead of `scipy.stats.pearsonr`, which also built the beta distribution for a p-value of the correlation that the approximation does not use. `ks2d2s` with the analytic p-value takes a third of its former time at 1,000 points per sample and about four fifths at 100,000, where the statistic dominates. A sample of one point gives a p-value of `nan` now instead of raising `ValueError`.
 - `maxdist.f90` declares `D_max` as a one-element array, which is the shape `ksnd.py` passes.
 - The function `maxdist_wraper` of `ndtest.ksnd`, which sorts and ranks the points for the kernel, is named `maxdist_wrapper`.
 

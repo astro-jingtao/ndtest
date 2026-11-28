@@ -2,6 +2,7 @@
 
 import numpy as np
 import pytest
+from scipy.stats import kstwobign, pearsonr
 
 from ndtest.ksnd import avgmaxdist, ks2d2s, maxdist_wrapper
 
@@ -162,6 +163,21 @@ class TestPValue:
         _, p_independent = ks2d2s(x1, y1, x2, y2)
         _, p_shifted = ks2d2s(x1, y1, x2, y2 + 0.5)
         assert p_shifted < p_independent
+
+    def test_analytic_p_value_is_the_approximation_of_press_2007(self, two_samples):
+        (x1, y1), (x2, y2) = two_samples
+        n1, n2 = len(x1), len(x2)
+        D, p = ks2d2s(x1, y1, x2, y2)
+        sqen = np.sqrt(n1 * n2 / (n1 + n2))
+        r = np.sqrt(1 - 0.5 * (pearsonr(x1, y1)[0] ** 2 + pearsonr(x2, y2)[0] ** 2))
+        expected = kstwobign.sf(D * sqen / (1 + r * (0.25 - 0.75 / sqen)))
+        assert p == pytest.approx(expected, rel=1e-12)
+
+    def test_analytic_p_value_is_finite_for_a_linear_coordinate(self):
+        rng = np.random.default_rng(12)
+        x1, x2 = rng.normal(size=(2, 300))
+        _, p = ks2d2s(x1, 2 * x1, x2, -3 * x2)
+        assert np.isfinite(p)
 
     def test_bootstrap_p_value_is_a_fraction_of_resamples(self, two_samples):
         (x1, y1), (x2, y2) = two_samples

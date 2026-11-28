@@ -6,7 +6,7 @@ from __future__ import annotations
 from joblib import Parallel, delayed
 import numpy as np
 from numpy.typing import ArrayLike
-from scipy.stats import kstwobign, pearsonr
+from scipy.stats import kstwobign
 
 from ndtest.maxdist import maxdist
 
@@ -71,8 +71,8 @@ def ks2d2s(
 
     if nboot is None:
         sqen = np.sqrt(n1 * n2 / (n1 + n2))
-        r1 = pearsonr(x1, y1)[0]
-        r2 = pearsonr(x2, y2)[0]
+        r1 = np.corrcoef(x1, y1)[0, 1]
+        r2 = np.corrcoef(x2, y2)[0, 1]
         r = np.sqrt(1 - 0.5 * (r1**2 + r2**2))
         d = D * sqen / (1 + r * (0.25 - 0.75 / sqen))
         p = kstwobign.sf(d)
